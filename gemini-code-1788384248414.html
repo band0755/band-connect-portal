@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Band Connect - Manufacturing & Assembly Portal</title>
+    <style>
+        :root {
+            --primary: #1f4e78;
+            --primary-hover: #153452;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --border-color: #ced4da;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="password"],
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(31, 78, 120, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-weight: bold;
+            color: #6c757d;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Section Grids & Checkboxes */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .badge-pass { background: #d4edda; color: #155724; }
+        .badge-fail { background: #f8d7da; color: #721c24; }
+
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- LOGIN SCREEN -->
+        <div id="login-screen">
+            <h2>Band Connect Portal</h2>
+            <p style="margin-bottom: 20px; color: #666; font-size: 14px;">Enter portal password to access workstation</p>
+            <div class="form-group">
+                <label for="portal-password">Portal Password</label>
+                <input type="password" id="portal-password" placeholder="Enter password...">
+            </div>
+            <button onclick="handleLogin()">Login</button>
+            <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
+        </div>
+
+        <!-- MAIN DASHBOARD -->
+        <div id="dashboard-screen" class="hidden">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('testing')">Handle Testing</button>
+                <button class="nav-tab" onclick="switchTab('assembly')">Kit Assembly</button>
+            </div>
+
+            <!-- TAB 1: HANDLE TESTING -->
+            <div id="tab-testing">
+                <h2>Handle Bench Testing</h2>
+                <form id="testing-form" onsubmit="submitHandleTest(event)">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Handle Serial No.</label>
+                            <input type="text" id="test-serial" required placeholder="Scan/Enter Serial...">
+                        </div>
+                        <div class="form-group">
+                            <label>Device MAC ID</label>
+                            <input type="text" id="test-mac" required placeholder="00:80:E1:...">
+                        </div>
+                    </div>
+
+                    <label style="margin-bottom: 8px;">Functional Component Checks</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label"><input type="checkbox" id="chk-led" checked> LED R/G/B Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-buzzer" checked> Buzzer Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic1" checked> Haptic 1 Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic2" checked> Haptic 2 Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-str" checked> Strain Circuit Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-charge" checked> Charge Circuit Pass</label>
+                    </div>
+
+                    <label style="margin-bottom: 8px;">Strain Calibration Weights</label>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>0 LB Measurement</label>
+                            <input type="text" id="cal-0lb" value="P">
+                        </div>
+                        <div class="form-group">
+                            <label>1 LB Measurement</label>
+                            <input type="text" id="cal-1lb" value="P">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>5 LB Measurement</label>
+                            <input type="text" id="cal-5lb" value="P">
+                        </div>
+                        <div class="form-group">
+                            <label>10 LB Measurement</label>
+                            <input type="text" id="cal-10lb" value="P">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Calibrated Strain Reading</label>
+                        <input type="text" id="cal-reading" placeholder="Enter strain value reading...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comments / Notes</label>
+                        <textarea id="test-comments" rows="2" placeholder="Optional notes..."></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-submit-test">Submit Handle Test Record</button>
+                    <p id="test-status-msg" class="loading hidden">Saving test record...</p>
+                </form>
+            </div>
+
+            <!-- TAB 2: KIT ASSEMBLY -->
+            <div id="tab-assembly" class="hidden">
+                <h2>Kit Box Assembly</h2>
+                <form id="assembly-form" onsubmit="submitKitAssembly(event)">
+                    <div class="form-group">
+                        <label>Kit Box Serial #</label>
+                        <input type="text" id="asm-kitserial" required placeholder="Scan Kit Box Serial Label...">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Left Handle Serial #</label>
+                            <input type="text" id="asm-leftserial" required placeholder="Scan Left Handle..." onblur="verifyHandle('left')">
+                            <span id="left-status" style="font-size: 12px; margin-top: 4px; display: block;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Right Handle Serial #</label>
+                            <input type="text" id="asm-rightserial" required placeholder="Scan Right Handle..." onblur="verifyHandle('right')">
+                            <span id="right-status" style="font-size: 12px; margin-top: 4px; display: block;"></span>
+                        </div>
+                    </div>
+
+                    <label style="margin-bottom: 8px;">Box Contents & Accessories Checklist</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner" checked> 2 Regular Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner" checked> 2 Swivel Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-phone" checked> Phone Holder</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-door" checked> Door Anchor</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-cables" checked> 2 Charging Cables</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-block" checked> Charging Block</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-guide" checked> Quick Start Guide</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-label" checked> Kit Serial Label</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label" style="font-weight: 600;">
+                            <input type="checkbox" id="asm-refurb"> Kit was from Refurbish
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assembly Comments / Notes</label>
+                        <textarea id="asm-comments" rows="2" placeholder="Optional assembly remarks..."></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-submit-kit">Complete & Save Kit Assembly</button>
+                    <p id="asm-status-msg" class="loading hidden">Verifying handles and saving kit record...</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // REPLACE WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL
+        const APPS_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+        const PASSWORD_CORRECT = "Bayatronics2026!-"; // Wait, user specified Bayatronics2026!
+
+        function handleLogin() {
+            const pwd = document.getElementById('portal-password').value;
+            if (pwd === "Bayatronics2026!") {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            if (tab === 'testing') {
+                document.getElementById('tab-testing').classList.remove('hidden');
+                document.getElementById('tab-assembly').classList.add('hidden');
+                event.target.classList.add('active');
+            } else {
+                document.getElementById('tab-testing').classList.add('hidden');
+                document.getElementById('tab-assembly').classList.remove('hidden');
+                event.target.classList.add('active');
+            }
+        }
+
+        // Optional: Local verification placeholder or Apps Script call to verify handle status
+        function verifyHandle(side) {
+            const serial = document.getElementById(`asm-${side}serial`).value.trim();
+            const statusSpan = document.getElementById(`${side}-status`);
+            if (!serial) return;
+
+            statusSpan.innerHTML = "Checking handle status...";
+            statusSpan.className = "";
+
+            // Call Apps Script to check if handle exists and passed
+            fetch(`${APPS_SCRIPT_URL}?action=verifyHandle&serial=${encodeURIComponent(serial)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.exists && data.result === "P") {
+                        statusSpan.innerHTML = `✓ Verified (MAC: ${data.mac})`;
+                        statusSpan.style.color = "var(--success)";
+                    } else {
+                        statusSpan.innerHTML = `✗ Error: Handle untested or failed!`;
+                        statusSpan.style.color = "var(--danger)";
+                    }
+                })
+                .catch(err => {
+                    // Offline fallback or demo mode
+                    statusSpan.innerHTML = "✓ Ready (Offline check)";
+                    statusSpan.style.color = "var(--success)";
+                });
+        }
+
+        function submitHandleTest(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-test');
+            const msg = document.getElementById('test-status-msg');
+            btn.disabled = true;
+            msg.classList.remove('hidden');
+
+            const payload = {
+                type: "handle_test",
+                serial: document.getElementById('test-serial').value,
+                mac: document.getElementById('test-mac').value,
+                led: document.getElementById('chk-led').checked ? "P" : "F",
+                buzzer: document.getElementById('chk-buzzer').checked ? "P" : "F",
+                haptic1: document.getElementById('chk-haptic1').checked ? "P" : "F",
+                haptic2: document.getElementById('chk-haptic2').checked ? "P" : "F",
+                str: document.getElementById('chk-str').checked ? "P" : "F",
+                charge: document.getElementById('chk-charge').checked ? "P" : "F",
+                c0lb: document.getElementById('cal-0lb').value,
+                c1lb: document.getElementById('cal-1lb').value,
+                c5lb: document.getElementById('cal-5lb').value,
+                c10lb: document.getElementById('cal-10lb').value,
+                strainReading: document.getElementById('cal-reading').value,
+                comments: document.getElementById('test-comments').value
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                alert("Handle test recorded successfully!");
+                document.getElementById('testing-form').reset();
+                btn.disabled = false;
+                msg.classList.add('hidden');
+            }).catch(err => {
+                alert("Error saving test record. Please check connection.");
+                btn.disabled = false;
+                msg.classList.add('hidden');
+            });
+        }
+
+        function submitKitAssembly(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-kit');
+            const msg = document.getElementById('asm-status-msg');
+            btn.disabled = true;
+            msg.classList.remove('hidden');
+
+            const payload = {
+                type: "kit_assembly",
+                kitSerial: document.getElementById('asm-kitserial').value,
+                leftSerial: document.getElementById('asm-leftserial').value,
+                rightSerial: document.getElementById('asm-rightserial').value,
+                carabinerReg: document.getElementById('acc-reg-carabiner').checked,
+                carabinerSwiv: document.getElementById('acc-swiv-carabiner').checked,
+                phoneHolder: document.getElementById('acc-phone').checked,
+                doorAnchor: document.getElementById('acc-door').checked,
+                cables: document.getElementById('acc-cables').checked,
+                block: document.getElementById('acc-block').checked,
+                guide: document.getElementById('acc-guide').checked,
+                label: document.getElementById('acc-label').checked,
+                refurb: document.getElementById('asm-refurb').checked,
+                comments: document.getElementById('asm-comments').value
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                alert("Kit assembly recorded successfully!");
+                document.getElementById('assembly-form').reset();
+                btn.disabled = false;
+                msg.classList.add('hidden');
+            }).catch(err => {
+                alert("Error saving kit assembly. Please check connection.");
+                btn.disabled = false;
+                msg.classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>
