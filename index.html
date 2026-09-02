@@ -359,14 +359,14 @@
                     <div class="grid-2">
                         <div class="form-group">
                             <label>Left Handle Serial # (Passed Testing)</label>
-                            <select id="asm-leftserial" required onchange="updateHandleInfo('left')">
+                            <select id="asm-leftserial" required onchange="filterHandleDropdowns()">
                                 <option value="">-- Select Tested Left Handle --</option>
                             </select>
                             <span id="left-mac-display" style="font-size: 11px; color: var(--primary-purple); margin-top: 4px; display: block;"></span>
                         </div>
                         <div class="form-group">
                             <label>Right Handle Serial # (Passed Testing)</label>
-                            <select id="asm-rightserial" required onchange="updateHandleInfo('right')">
+                            <select id="asm-rightserial" required onchange="filterHandleDropdowns()">
                                 <option value="">-- Select Tested Right Handle --</option>
                             </select>
                             <span id="right-mac-display" style="font-size: 11px; color: var(--primary-purple); margin-top: 4px; display: block;"></span>
@@ -446,7 +446,8 @@
             }
         }
 
-        let testedHandlesCache = {};
+        let allHandlesCache = [];
+        let assembledHandlesCache = new Set();
 
         function loadTestedHandles() {
             const leftSelect = document.getElementById('asm-leftserial');
@@ -458,20 +459,17 @@
             fetch(`${APPS_SCRIPT_URL}?action=getTestedHandles`)
                 .then(res => res.json())
                 .then(data => {
-                    testedHandlesCache = {};
-                    let optionsHtml = '<option value="">-- Select Tested Handle --</option>';
+                    allHandlesCache = [];
+                    assembledHandlesCache = new Set();
                     
-                    if (data && data.handles && data.handles.length > 0) {
-                        data.handles.forEach(h => {
-                            testedHandlesCache[h.serial] = h.mac;
-                            optionsHtml += `<option value="${h.serial}">${h.serial} (MAC: ${h.mac})</option>`;
-                        });
-                    } else {
-                        optionsHtml = '<option value="">No passed handles found yet</option>';
+                    if (data && data.handles) {
+                        allHandlesCache = data.handles;
+                    }
+                    if (data && data.assembled) {
+                        data.assembled.forEach(s => assembledHandlesCache.add(s));
                     }
 
-                    leftSelect.innerHTML = optionsHtml;
-                    rightSelect.innerHTML = optionsHtml;
+                    renderDropdowns();
                 })
                 .catch(err => {
                     leftSelect.innerHTML = '<option value="">Error loading handles</option>';
@@ -479,11 +477,60 @@
                 });
         }
 
+        function renderDropdowns() {
+            const leftSelect = document.getElementById('asm-leftserial');
+            const rightSelect = document.getElementById('asm-rightserial');
+
+            const currentLeft = leftSelect.value;
+            const currentRight = rightSelect.value;
+
+            let leftOptions = '<option value="">-- Select Tested Left Handle --</option>';
+            let rightOptions = '<option value="">-- Select Tested Right Handle --</option>';
+
+            let availableCount = 0;
+
+            allHandlesCache.forEach(h => {
+                // Skip if already used in a kit assembly
+                if (assembledHandlesCache.has(h.serial)) return;
+
+                availableCount++;
+                const label = `${h.serial} (MAC: ${h.mac})`;
+
+                // Keep selection if currently picked
+                const leftSelectedAttr = (h.serial === currentLeft) ? 'selected' : '';
+                const rightSelectedAttr = (h.serial === currentRight) ? 'selected' : '';
+
+                // Prevent choosing the same handle for both left and right
+                if (h.serial !== currentRight) {
+                    leftOptions += `<option value="${h.serial}" ${leftSelectedAttr}>${label}</option>`;
+                }
+                if (h.serial !== currentLeft) {
+                    rightOptions += `<option value="${h.serial}" ${rightSelectedAttr}>${label}</option>`;
+                }
+            });
+
+            if (availableCount === 0) {
+                leftOptions = '<option value="">No available tested handles</option>';
+                rightOptions = '<option value="">No available tested handles</option>';
+            }
+
+            leftSelect.innerHTML = leftOptions;
+            rightSelect.innerHTML = rightOptions;
+
+            updateHandleInfo('left');
+            updateHandleInfo('right');
+        }
+
+        function filterHandleDropdowns() {
+            renderDropdowns();
+        }
+
         function updateHandleInfo(side) {
             const serial = document.getElementById(`asm-${side}serial`).value;
             const span = document.getElementById(`${side}-mac-display`);
-            if (serial && testedHandlesCache[serial]) {
-                span.innerText = `Matched MAC ID: ${testedHandlesCache[serial]}`;
+            const found = allHandlesCache.find(h => h.serial === serial);
+            if (found) {
+                span.innerText = `Matched MAC ID: ${found.mac}`;
             } else {
                 span.innerText = '';
             }
@@ -538,11 +585,14 @@
             btn.disabled = true;
             msg.classList.remove('hidden');
 
+            const leftVal = document.getElementById('asm-leftserial').value;
+            const rightVal = document.getElementById('asm-rightserial').value;
+
             const payload = {
                 type: "kit_assembly",
                 kitSerial: document.getElementById('asm-kitserial').value,
-                leftSerial: document.getElementById('asm-leftserial').value,
-                rightSerial: document.getElementById('asm-rightserial').value,
+                leftSerial: leftVal,
+                rightSerial: rightVal,
                 carabinerReg: document.getElementById('acc-reg-carabiner').checked,
                 carabinerSwiv: document.getElementById('acc-swiv-carabiner').checked,
                 phoneHolder: document.getElementById('acc-phone').checked,
@@ -562,7 +612,12 @@
                 body: JSON.stringify(payload)
             }).then(() => {
                 alert("Kit assembly recorded successfully!");
+                // Immediately mark them as used locally so they vanish from the dropdowns right away
+                assembledHandlesCache.add(leftVal);
+                assembledHandlesCache.add(rightVal);
+                
                 document.getElementById('assembly-form').reset();
+                renderDropdowns();
                 btn.disabled = false;
                 msg.classList.add('hidden');
             }).catch(err => {
