@@ -129,6 +129,33 @@
             box-shadow: 0 0 6px rgba(123, 77, 255, 0.3);
         }
 
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-container input {
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 13px;
+            width: auto;
+            padding: 4px;
+        }
+
+        .toggle-password:hover {
+            color: var(--text-light);
+            background: none;
+        }
+
         button {
             width: 100%;
             padding: 14px;
@@ -238,9 +265,12 @@
             <h2>Workstation Authentication</h2>
             <p class="subtitle">Enter your secure portal password</p>
             <div class="form-group">
-                <input type="password" id="portal-password" placeholder="Enter password..." onkeydown="if(event.key === 'Enter') handleLogin()">
+                <div class="password-container">
+                    <input type="password" id="portal-password" placeholder="Enter password..." onkeydown="if(event.key === 'Enter') handleLogin()">
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">Show</button>
+                </div>
             </div>
-            <button id="login-btn">Access Portal</button>
+            <button type="button" onclick="handleLogin()">Access Portal</button>
             <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
         </div>
 
@@ -380,6 +410,18 @@
     <script>
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHJNH8kqTzWCfAQXhOJPsXaZl13SxVR2FHApTUA5uDgdZRZuGxF_2YluKxGwe1OENbZA/exec";
 
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('portal-password');
+            const toggleBtn = document.querySelector('.toggle-password');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                toggleBtn.innerText = 'Hide';
+            } else {
+                pwdInput.type = 'password';
+                toggleBtn.innerText = 'Show';
+            }
+        }
+
         function handleLogin() {
             const pwd = document.getElementById('portal-password').value;
             if (pwd === "Bayatronics2026!") {
@@ -389,9 +431,6 @@
                 document.getElementById('login-error').classList.remove('hidden');
             }
         }
-
-        // Attach event listener explicitly
-        document.getElementById('login-btn').addEventListener('click', handleLogin);
 
         function switchTab(tab) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
