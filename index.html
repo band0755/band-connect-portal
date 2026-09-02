@@ -34,7 +34,6 @@
             align-items: center;
         }
 
-        /* Band Connect Brand Header */
         header {
             width: 100%;
             padding: 20px 40px;
@@ -50,7 +49,6 @@
             align-items: center;
             font-size: 22px;
             font-weight: bold;
-            letter-spacing: 0.5px;
             color: var(--text-light);
         }
 
@@ -99,7 +97,6 @@
             display: none !important;
         }
 
-        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
             text-align: left;
@@ -111,7 +108,6 @@
             margin-bottom: 8px;
             font-size: 13px;
             color: var(--text-light);
-            letter-spacing: 0.3px;
         }
 
         input[type="password"],
@@ -125,7 +121,6 @@
             border-radius: 6px;
             color: var(--text-light);
             font-size: 14px;
-            transition: border-color 0.2s;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -144,15 +139,11 @@
             font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s;
         }
 
         button:hover {
             background-color: var(--primary-hover);
-        }
-
-        button:active {
-            transform: scale(0.99);
         }
 
         .error-msg {
@@ -162,7 +153,6 @@
             text-align: center;
         }
 
-        /* Navigation Tabs */
         .nav-tabs {
             display: flex;
             margin-bottom: 25px;
@@ -180,7 +170,6 @@
             cursor: pointer;
             border-bottom: 2px solid transparent;
             margin-bottom: -1px;
-            transition: color 0.2s;
         }
 
         .nav-tab.active {
@@ -188,7 +177,6 @@
             border-bottom-color: var(--primary-purple);
         }
 
-        /* Grids & Checkboxes */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -229,7 +217,6 @@
             font-size: 13px;
         }
 
-        /* Available Handles Selector Dropdown styling */
         select option {
             background-color: var(--bg-dark);
             color: var(--text-light);
@@ -251,9 +238,9 @@
             <h2>Workstation Authentication</h2>
             <p class="subtitle">Enter your secure portal password</p>
             <div class="form-group">
-                <input type="password" id="portal-password" placeholder="Enter password...">
+                <input type="password" id="portal-password" placeholder="Enter password..." onkeydown="if(event.key === 'Enter') handleLogin()">
             </div>
-            <button onclick="handleLogin()">Access Portal</button>
+            <button id="login-btn">Access Portal</button>
             <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
         </div>
 
@@ -261,7 +248,7 @@
         <div id="dashboard-screen" class="card hidden">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('testing')">1. Handle Bench Testing</button>
-                <button class="nav-tab" onclick="switchTab('assembly')" onclick="loadTestedHandles()">2. Kit Assembly</button>
+                <button class="nav-tab" onclick="switchTab('assembly')">2. Kit Assembly</button>
             </div>
 
             <!-- TAB 1: HANDLE TESTING -->
@@ -403,6 +390,9 @@
             }
         }
 
+        // Attach event listener explicitly
+        document.getElementById('login-btn').addEventListener('click', handleLogin);
+
         function switchTab(tab) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             if (tab === 'testing') {
@@ -413,11 +403,10 @@
                 document.getElementById('tab-testing').classList.add('hidden');
                 document.getElementById('tab-assembly').classList.remove('hidden');
                 event.target.classList.add('active');
-                loadTestedHandles(); // Fetch tested handles when opening assembly tab
+                loadTestedHandles();
             }
         }
 
-        // Store fetched handles data
         let testedHandlesCache = {};
 
         function loadTestedHandles() {
@@ -539,8 +528,6 @@
                 msg.classList.add('hidden');
             }).catch(err => {
                 alert("Error saving kit assembly.");
-                btn.disabled = false;
-                msg.classList.0 && btn.classList.remove('hidden'); // safe guard
                 btn.disabled = false;
                 msg.classList.add('hidden');
             });
