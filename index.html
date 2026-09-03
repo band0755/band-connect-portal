@@ -197,35 +197,44 @@
             <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
-                <p class="subtitle">Pack kit box by entering verified left and right handle serial numbers.</p>
+                <p class="subtitle">Pack kit box by entering verified handle serial numbers.</p>
                 
                 <form id="assembly-form" onsubmit="submitKitAssembly(event)">
+                    <div class="form-group">
+                        <label>Extremity Type</label>
+                        <select id="asm-extremity" required onchange="handleKitExtremityChange()">
+                            <option value="">-- Select Extremity --</option>
+                            <option value="UPPER">Upper Extremity</option>
+                            <option value="LOWER">Lower Extremity</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>Kit Box Serial #</label>
                         <input type="text" id="asm-kitserial" required placeholder="Scan Kit Box Serial Label...">
                     </div>
 
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Left Handle Serial #</label>
-                            <input type="text" id="asm-leftserial" placeholder="Enter/Scan Left Serial...">
+                    <div class="grid-2" id="asm-serial-grid">
+                        <div class="form-group" id="group-left-serial">
+                            <label id="lbl-left-serial">Left Handle Serial #</label>
+                            <input type="text" id="asm-leftserial" required placeholder="Enter/Scan Left Serial...">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="group-right-serial">
                             <label>Right Handle Serial #</label>
-                            <input type="text" id="asm-rightserial" placeholder="Enter/Scan Right Serial...">
+                            <input type="text" id="asm-rightserial" required placeholder="Enter/Scan Right Serial...">
                         </div>
                     </div>
 
-                    <label style="margin-bottom: 8px;">Box Contents & Accessories Checklist</label>
+                    <label style="margin-bottom: 8px;">Box Contents & Accessories Checklist (All Required)</label>
                     <div class="checkbox-grid">
-                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner"> 2 Regular Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner"> 2 Swivel Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-phone"> Phone Holder</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-door"> Door Anchor</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-cables"> 2 Charging Cables</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-block"> Charging Block</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-guide"> Quick Start Guide</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-label"> Kit Serial Label</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner" class="asm-chk"> 2 Regular Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner" class="asm-chk"> 2 Swivel Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-phone" class="asm-chk"> Phone Holder</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-door" class="asm-chk"> Door Anchor</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-cables" class="asm-chk"> 2 Charging Cables</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-block" class="asm-chk"> Charging Block</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-guide" class="asm-chk"> Quick Start Guide</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-label" class="asm-chk"> Kit Serial Label</label>
                     </div>
 
                     <div class="form-group">
@@ -317,6 +326,24 @@
                 sideGroup.classList.add('hidden');
                 sideSelect.required = false;
                 sideSelect.value = "";
+            }
+        }
+
+        function handleKitExtremityChange() {
+            const ext = document.getElementById('asm-extremity').value;
+            const leftLabel = document.getElementById('lbl-left-serial');
+            const rightGroup = document.getElementById('group-right-serial');
+            const rightInput = document.getElementById('asm-rightserial');
+
+            if (ext === 'LOWER') {
+                leftLabel.innerText = "Device (Left) Serial #";
+                rightGroup.classList.add('hidden');
+                rightInput.required = false;
+                rightInput.value = "";
+            } else { // UPPER or blank
+                leftLabel.innerText = "Left Handle Serial #";
+                rightGroup.classList.remove('hidden');
+                rightInput.required = true;
             }
         }
 
@@ -462,17 +489,35 @@
 
         function submitKitAssembly(e) {
             e.preventDefault();
+            const ext = document.getElementById('asm-extremity').value;
             const leftVal = document.getElementById('asm-leftserial').value.trim().toUpperCase();
             const rightVal = document.getElementById('asm-rightserial').value.trim().toUpperCase();
 
-            if (!leftVal && !rightVal) {
-                alert("ERROR: Please enter at least one handle serial number (Left or Right)!");
+            // 1. Check all accessories are checked
+            const chkBoxes = document.querySelectorAll('.asm-chk');
+            let allChecked = true;
+            chkBoxes.forEach(chk => { if (!chk.checked) allChecked = false; });
+
+            if (!allChecked) {
+                alert("ERROR: All accessory components must be checked to confirm they have been added to the kit before saving!");
                 return;
             }
 
-            if (leftVal && rightVal && leftVal === rightVal) {
-                alert("ERROR: Left Handle and Right Handle serial numbers cannot be the same!");
-                return;
+            // 2. Validation for Upper Extremity dual handles
+            if (ext === 'UPPER') {
+                if (!leftVal || !rightVal) {
+                    alert("ERROR: Upper Extremity requires both Left Handle and Right Handle serial numbers!");
+                    return;
+                }
+                if (leftVal === rightVal) {
+                    alert("ERROR: Left Handle and Right Handle serial numbers cannot be identical!");
+                    return;
+                }
+            } else if (ext === 'LOWER') {
+                if (!leftVal) {
+                    alert("ERROR: Please enter the Device (Left) Serial Number!");
+                    return;
+                }
             }
 
             const confirmSubmit = confirm("Would you like to submit and complete this kit assembly?");
@@ -485,9 +530,10 @@
 
             const payload = {
                 type: "kit_assembly",
+                extremity: ext,
                 kitSerial: document.getElementById('asm-kitserial').value.trim().toUpperCase(),
-                leftSerial: leftVal || "N/A",
-                rightSerial: rightVal || "N/A",
+                leftSerial: leftVal,
+                rightSerial: ext === 'UPPER' ? rightVal : 'N/A',
                 carabinerReg: document.getElementById('acc-reg-carabiner').checked,
                 carabinerSwiv: document.getElementById('acc-swiv-carabiner').checked,
                 phoneHolder: document.getElementById('acc-phone').checked,
@@ -507,6 +553,7 @@
             }).then(() => {
                 alert("Kit Assembly recorded successfully!");
                 document.getElementById('assembly-form').reset();
+                handleKitExtremityChange();
                 btn.disabled = false;
                 btnText.innerText = "Complete & Save Kit Assembly";
             }).catch(() => {
