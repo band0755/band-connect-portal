@@ -100,6 +100,7 @@
     </header>
 
     <div class="main-wrapper">
+        <!-- LOGIN SCREEN -->
         <div id="login-screen" class="card" style="max-width: 450px; margin: 0 auto; text-align: center;">
             <h2>Workstation Authentication</h2>
             <p class="subtitle">Enter your secure portal password</p>
@@ -113,6 +114,7 @@
             <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
         </div>
 
+        <!-- MAIN DASHBOARD -->
         <div id="dashboard-screen" class="card hidden">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('testing')">1. Handle Testing</button>
@@ -120,6 +122,7 @@
                 <button class="nav-tab" onclick="switchTab('failed')">3. Failed Tests</button>
             </div>
 
+            <!-- TAB 1: HANDLE TESTING -->
             <div id="tab-testing">
                 <h2>Handle Bench Testing</h2>
                 <p class="subtitle">Log diagnostic results and strain calibrations.</p>
@@ -135,11 +138,11 @@
                     </div>
 
                     <div id="side-selection-group" class="form-group hidden">
-                        <label>Side (Upper Extremity)</label>
+                        <label id="side-label">Side</label>
                         <select id="test-side">
                             <option value="">-- Select Side --</option>
-                            <option value="LEFT">Left</option>
-                            <option value="RIGHT">Right</option>
+                            <option value="LEFT">LEFT</option>
+                            <option value="RIGHT">RIGHT</option>
                         </select>
                     </div>
 
@@ -191,6 +194,7 @@
                 </form>
             </div>
 
+            <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
                 <p class="subtitle">Pack kit box by entering verified left and right handle serial numbers.</p>
@@ -235,6 +239,7 @@
                 </form>
             </div>
 
+            <!-- TAB 3: FAILED TESTS -->
             <div id="tab-failed" class="hidden">
                 <h2>Failed Tests Inventory</h2>
                 <p class="subtitle">Review and re-test handles that failed previous component checks.</p>
@@ -285,21 +290,32 @@
         function handleExtremityChange() {
             const ext = document.getElementById('test-extremity').value;
             const sideGroup = document.getElementById('side-selection-group');
+            const sideLabel = document.getElementById('side-label');
+            const sideSelect = document.getElementById('test-side');
             const calSection = document.getElementById('calibration-section');
 
             if (ext === 'UPPER') {
                 sideGroup.classList.remove('hidden');
-                document.getElementById('test-side').required = true;
+                sideLabel.innerText = "Side (Upper Extremity)";
+                sideSelect.disabled = false;
+                sideSelect.required = true;
+                sideSelect.value = ""; // User picks Left or Right
+                
                 calSection.querySelectorAll('input').forEach(i => i.disabled = false);
                 calSection.style.opacity = '1';
             } else if (ext === 'LOWER') {
-                sideGroup.classList.add('hidden');
-                document.getElementById('test-side').required = false;
+                sideGroup.classList.remove('hidden');
+                sideLabel.innerText = "Side (Lower Extremity - Default)";
+                sideSelect.disabled = true;
+                sideSelect.required = false;
+                sideSelect.value = "LEFT"; // Autopopulate & lock to LEFT
+                
                 calSection.querySelectorAll('input').forEach(i => { i.disabled = true; i.value = ''; });
                 calSection.style.opacity = '0.4';
             } else {
                 sideGroup.classList.add('hidden');
-                document.getElementById('test-side').required = false;
+                sideSelect.required = false;
+                sideSelect.value = "";
             }
         }
 
@@ -311,6 +327,7 @@
             btnText.innerHTML = '<div class="spinner"></div> Submitting Test...';
 
             const ext = document.getElementById('test-extremity').value;
+            const sideVal = document.getElementById('test-side').value;
             const chkPass = document.getElementById('chk-led').checked &&
                             document.getElementById('chk-buzzer').checked &&
                             document.getElementById('chk-haptic1').checked &&
@@ -321,7 +338,7 @@
             const payload = {
                 type: "handle_test",
                 extremity: ext,
-                side: ext === 'UPPER' ? document.getElementById('test-side').value : '',
+                side: sideVal,
                 serial: document.getElementById('test-serial').value.toUpperCase(),
                 mac: document.getElementById('test-mac').value.toUpperCase(),
                 led: document.getElementById('chk-led').checked ? "P" : "F",
