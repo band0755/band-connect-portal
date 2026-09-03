@@ -250,6 +250,7 @@
 
     <script>
         const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHJNH8kqTzWCfAQXhOJPsXaZl13SxVR2FHApTUA5uDgdZRZuGxF_2YluKxGwe1OENbZA/exec";
+        let failedTestsCache = null;
 
         function togglePasswordVisibility() {
             const pwdInput = document.getElementById('portal-password');
@@ -323,7 +324,7 @@
             e.preventDefault();
             const ext = document.getElementById('test-extremity').value;
 
-            // 1. Check for missing strain calibration weights on Upper Extremity
+            // Check for missing strain calibration weights on Upper Extremity
             if (ext === 'UPPER') {
                 const c0 = document.getElementById('cal-0lb').value.trim();
                 const c1 = document.getElementById('cal-1lb').value.trim();
@@ -333,13 +334,12 @@
 
                 if (!c0 || !c1 || !c5 || !c10 || !reading) {
                     const confirmCal = confirm("Strain calibration weights are missing! Are you sure you want to continue?");
-                    if (!confirmCal) return; // Stop submission if user clicks Cancel
+                    if (!confirmCal) return;
                 }
             }
 
-            // 2. Normal submission confirmation pop-up
             const confirmSubmit = confirm("Would you like to submit this handle test record?");
-            if (!confirmSubmit) return; // Stop submission if user clicks Cancel
+            if (!confirmSubmit) return;
 
             const btn = document.getElementById('btn-submit-test');
             const btnText = document.getElementById('btn-text-test');
@@ -381,6 +381,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(() => {
+                failedTestsCache = null; // Clear cache on new test submission
                 if (chkPass) {
                     alert("Handle Test PASSED & recorded!");
                 } else {
@@ -397,39 +398,64 @@
             });
         }
 
-        function loadFailedTests() {
+        function loadFailedTests(forceRefresh = false) {
             const container = document.getElementById('failed-list');
-            container.innerHTML = "Loading failed tests...";
+
+            if (failedTestsCache && !forceRefresh) {
+                renderFailedList(failedTestsCache);
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="text-align: center; padding: 25px; color: var(--text-muted);">
+                    <div class="spinner" style="margin: 0 auto 12px auto; width: 24px; height: 24px;"></div>
+                    Fetching failed records from Google Sheets...
+                </div>
+            `;
 
             fetch(`${APPS_SCRIPT_URL}?action=getFailedTests`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data && data.failed && data.failed.length > 0) {
-                        let html = '';
-                        data.failed.forEach(item => {
-                            html += `
-                                <div class="failed-card">
-                                    <div>
-                                        <strong>Serial: ${item.serial}</strong> (${item.extremity} ${item.side ? '- ' + item.side : ''})<br>
-                                        <small style="color: var(--text-muted)">MAC: ${item.mac}</small>
-                                    </div>
-                                    <button type="button" onclick="openFailedForReprocess('${item.serial}', '${item.mac}', '${item.extremity}', '${item.side}')" style="width: auto; padding: 8px 16px; font-size: 12px;">
-                                        Re-Test & Process
-                                    </button>
-                                </div>
-                            `;
-                        });
-                        container.innerHTML = html;
-                    } else {
-                        container.innerHTML = "<p style='color: var(--text-muted); text-align: center;'>No failed tests found.</p>";
-                    }
+                    failedTestsCache = (data && data.failed) ? data.failed : [];
+                    renderFailedList(failedTestsCache);
                 })
-                .catch(() => { container.innerHTML = "Error loading failed tests."; });
+                .catch(() => { 
+                    container.innerHTML = "<p style='color: var(--danger); text-align: center;'>Error loading failed tests. Click refresh to try again.</p>"; 
+                });
+        }
+
+        function renderFailedList(failedItems) {
+            const container = document.getElementById('failed-list');
+            if (failedItems.length > 0) {
+                let html = `
+                    <div style="text-align: right; margin-bottom: 12px;">
+                        <button type="button" onclick="loadFailedTests(true)" style="width: auto; padding: 6px 14px; font-size: 12px; background: transparent; border: 1px solid var(--primary-purple); color: var(--text-light);">
+                            ↻ Refresh List
+                        </button>
+                    </div>
+                `;
+                failedItems.forEach(item => {
+                    html += `
+                        <div class="failed-card">
+                            <div>
+                                <strong>Serial: ${item.serial}</strong> (${item.extremity} ${item.side ? '- ' + item.side : ''})<br>
+                                <small style="color: var(--text-muted)">MAC: ${item.mac}</small>
+                            </div>
+                            <button type="button" onclick="openFailedForReprocess('${item.serial}', '${item.mac}', '${item.extremity}', '${item.side}')" style="width: auto; padding: 8px 16px; font-size: 12px;">
+                                Re-Test & Process
+                            </button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = "<p style='color: var(--text-muted); text-align: center;'>No failed tests found.</p>";
+            }
         }
 
         function openFailedForReprocess(serial, mac, extremity, side) {
             const confirmReprocess = confirm(`Would you like to re-test and process failed handle ${serial}?`);
-            if (!confirmReprocess) return; // Stop if user clicks Cancel
+            if (!confirmReprocess) return;
 
             switchTab('testing');
             document.getElementById('test-extremity').value = extremity;
@@ -449,9 +475,8 @@
                 return;
             }
 
-            // Submission confirmation pop-up
             const confirmSubmit = confirm("Would you like to submit and complete this kit assembly?");
-            if (!confirmSubmit) return; // Stop submission if user clicks Cancel
+            if (!confirmSubmit) return;
 
             const btn = document.getElementById('btn-submit-kit');
             const btnText = document.getElementById('btn-text-kit');
