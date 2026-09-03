@@ -208,11 +208,11 @@
                     <div class="grid-2">
                         <div class="form-group">
                             <label>Left Handle Serial #</label>
-                            <input type="text" id="asm-leftserial" required placeholder="Enter/Scan Left Serial...">
+                            <input type="text" id="asm-leftserial" placeholder="Enter/Scan Left Serial...">
                         </div>
                         <div class="form-group">
                             <label>Right Handle Serial #</label>
-                            <input type="text" id="asm-rightserial" required placeholder="Enter/Scan Right Serial...">
+                            <input type="text" id="asm-rightserial" placeholder="Enter/Scan Right Serial...">
                         </div>
                     </div>
 
@@ -324,7 +324,6 @@
             e.preventDefault();
             const ext = document.getElementById('test-extremity').value;
 
-            // Check if Calibrated Strain Reading is missing on Upper Extremity
             if (ext === 'UPPER') {
                 const reading = document.getElementById('cal-reading').value.trim();
 
@@ -382,7 +381,7 @@
                 } else {
                     alert("Test FAILED (Unchecked component). Moved to Failed Tests folder!");
                 }
-                failedTestsCache = null; // Clear cache on new submit
+                failedTestsCache = null;
                 document.getElementById('testing-form').reset();
                 handleExtremityChange();
                 btn.disabled = false;
@@ -466,7 +465,12 @@
             const leftVal = document.getElementById('asm-leftserial').value.trim().toUpperCase();
             const rightVal = document.getElementById('asm-rightserial').value.trim().toUpperCase();
 
-            if (leftVal === rightVal) {
+            if (!leftVal && !rightVal) {
+                alert("ERROR: Please enter at least one handle serial number (Left or Right)!");
+                return;
+            }
+
+            if (leftVal && rightVal && leftVal === rightVal) {
                 alert("ERROR: Left Handle and Right Handle serial numbers cannot be the same!");
                 return;
             }
@@ -482,8 +486,8 @@
             const payload = {
                 type: "kit_assembly",
                 kitSerial: document.getElementById('asm-kitserial').value.trim().toUpperCase(),
-                leftSerial: leftVal,
-                rightSerial: rightVal,
+                leftSerial: leftVal || "N/A",
+                rightSerial: rightVal || "N/A",
                 carabinerReg: document.getElementById('acc-reg-carabiner').checked,
                 carabinerSwiv: document.getElementById('acc-swiv-carabiner').checked,
                 phoneHolder: document.getElementById('acc-phone').checked,
