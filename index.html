@@ -260,7 +260,6 @@
     </header>
 
     <div class="main-wrapper">
-        <!-- LOGIN SCREEN -->
         <div id="login-screen" class="card" style="max-width: 450px; margin: 0 auto; text-align: center;">
             <h2>Workstation Authentication</h2>
             <p class="subtitle">Enter your secure portal password</p>
@@ -274,14 +273,12 @@
             <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
         </div>
 
-        <!-- MAIN DASHBOARD -->
         <div id="dashboard-screen" class="card hidden">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('testing')">1. Handle Bench Testing</button>
                 <button class="nav-tab" onclick="switchTab('assembly')">2. Kit Assembly</button>
             </div>
 
-            <!-- TAB 1: HANDLE TESTING -->
             <div id="tab-testing">
                 <h2>Handle Bench Testing</h2>
                 <p class="subtitle">Log individual handle diagnostic results and sensor calibrations.</p>
@@ -300,12 +297,12 @@
 
                     <label style="margin-bottom: 8px;">Functional Component Checks</label>
                     <div class="checkbox-grid">
-                        <label class="checkbox-label"><input type="checkbox" id="chk-led" checked> LED R/G/B Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-buzzer" checked> Buzzer Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic1" checked> Haptic 1 Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic2" checked> Haptic 2 Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-str" checked> Strain Circuit Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-charge" checked> Charge Circuit Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-led"> LED R/G/B Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-buzzer"> Buzzer Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic1"> Haptic 1 Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic2"> Haptic 2 Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-str"> Strain Circuit Pass</label>
+                        <label class="checkbox-label"><input type="checkbox" id="chk-charge"> Charge Circuit Pass</label>
                     </div>
 
                     <label style="margin-bottom: 8px;">Strain Calibration Weights</label>
@@ -345,7 +342,6 @@
                 </form>
             </div>
 
-            <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
                 <p class="subtitle">Select verified handles from testing inventory and pack kit box.</p>
@@ -379,14 +375,14 @@
 
                     <label style="margin-bottom: 8px;">Box Contents & Accessories Checklist</label>
                     <div class="checkbox-grid">
-                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner" checked> 2 Regular Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner" checked> 2 Swivel Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-phone" checked> Phone Holder</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-door" checked> Door Anchor</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-cables" checked> 2 Charging Cables</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-block" checked> Charging Block</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-guide" checked> Quick Start Guide</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-label" checked> Kit Serial Label</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner"> 2 Regular Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner"> 2 Swivel Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-phone"> Phone Holder</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-door"> Door Anchor</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-cables"> 2 Charging Cables</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-block"> Charging Block</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-guide"> Quick Start Guide</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-label"> Kit Serial Label</label>
                     </div>
 
                     <div class="form-group">
@@ -490,17 +486,14 @@
             let availableCount = 0;
 
             allHandlesCache.forEach(h => {
-                // Skip if already used in a kit assembly
                 if (assembledHandlesCache.has(h.serial)) return;
 
                 availableCount++;
                 const label = `${h.serial} (MAC: ${h.mac})`;
 
-                // Keep selection if currently picked
                 const leftSelectedAttr = (h.serial === currentLeft) ? 'selected' : '';
                 const rightSelectedAttr = (h.serial === currentRight) ? 'selected' : '';
 
-                // Prevent choosing the same handle for both left and right
                 if (h.serial !== currentRight) {
                     leftOptions += `<option value="${h.serial}" ${leftSelectedAttr}>${label}</option>`;
                 }
@@ -612,7 +605,6 @@
                 body: JSON.stringify(payload)
             }).then(() => {
                 alert("Kit assembly recorded successfully!");
-                // Immediately mark them as used locally so they vanish from the dropdowns right away
                 assembledHandlesCache.add(leftVal);
                 assembledHandlesCache.add(rightVal);
                 
