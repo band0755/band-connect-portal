@@ -170,12 +170,12 @@
                     <div id="calibration-section">
                         <label style="margin-bottom: 8px;">Strain Calibration Weights</label>
                         <div class="grid-2">
-                            <div class="form-group"><label>0 LB Measurement</label><input type="text" id="cal-0lb" value="P"></div>
-                            <div class="form-group"><label>1 LB Measurement</label><input type="text" id="cal-1lb" value="P"></div>
+                            <div class="form-group"><label>0 LB Measurement</label><input type="text" id="cal-0lb" placeholder="Value..."></div>
+                            <div class="form-group"><label>1 LB Measurement</label><input type="text" id="cal-1lb" placeholder="Value..."></div>
                         </div>
                         <div class="grid-2">
-                            <div class="form-group"><label>5 LB Measurement</label><input type="text" id="cal-5lb" value="P"></div>
-                            <div class="form-group"><label>10 LB Measurement</label><input type="text" id="cal-10lb" value="P"></div>
+                            <div class="form-group"><label>5 LB Measurement</label><input type="text" id="cal-5lb" placeholder="Value..."></div>
+                            <div class="form-group"><label>10 LB Measurement</label><input type="text" id="cal-10lb" placeholder="Value..."></div>
                         </div>
                         <div class="form-group">
                             <label>Calibrated Strain Reading</label>
@@ -299,7 +299,7 @@
                 sideLabel.innerText = "Side (Upper Extremity)";
                 sideSelect.disabled = false;
                 sideSelect.required = true;
-                sideSelect.value = ""; // User picks Left or Right
+                sideSelect.value = "";
                 
                 calSection.querySelectorAll('input').forEach(i => i.disabled = false);
                 calSection.style.opacity = '1';
@@ -308,7 +308,7 @@
                 sideLabel.innerText = "Side (Lower Extremity - Default)";
                 sideSelect.disabled = true;
                 sideSelect.required = false;
-                sideSelect.value = "LEFT"; // Autopopulate & lock to LEFT
+                sideSelect.value = "LEFT";
                 
                 calSection.querySelectorAll('input').forEach(i => { i.disabled = true; i.value = ''; });
                 calSection.style.opacity = '0.4';
@@ -321,12 +321,31 @@
 
         function submitHandleTest(e) {
             e.preventDefault();
+            const ext = document.getElementById('test-extremity').value;
+
+            // 1. Check for missing strain calibration weights on Upper Extremity
+            if (ext === 'UPPER') {
+                const c0 = document.getElementById('cal-0lb').value.trim();
+                const c1 = document.getElementById('cal-1lb').value.trim();
+                const c5 = document.getElementById('cal-5lb').value.trim();
+                const c10 = document.getElementById('cal-10lb').value.trim();
+                const reading = document.getElementById('cal-reading').value.trim();
+
+                if (!c0 || !c1 || !c5 || !c10 || !reading) {
+                    const confirmCal = confirm("Strain calibration weights are missing! Are you sure you want to continue?");
+                    if (!confirmCal) return; // Stop submission if user clicks Cancel
+                }
+            }
+
+            // 2. Normal submission confirmation pop-up
+            const confirmSubmit = confirm("Would you like to submit this handle test record?");
+            if (!confirmSubmit) return; // Stop submission if user clicks Cancel
+
             const btn = document.getElementById('btn-submit-test');
             const btnText = document.getElementById('btn-text-test');
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Submitting Test...';
 
-            const ext = document.getElementById('test-extremity').value;
             const sideVal = document.getElementById('test-side').value;
             const chkPass = document.getElementById('chk-led').checked &&
                             document.getElementById('chk-buzzer').checked &&
@@ -348,11 +367,11 @@
                 str: document.getElementById('chk-str').checked ? "P" : "F",
                 charge: document.getElementById('chk-charge').checked ? "P" : "F",
                 overallResult: chkPass ? "P" : "F",
-                c0lb: ext === 'UPPER' ? document.getElementById('cal-0lb').value : 'N/A',
-                c1lb: ext === 'UPPER' ? document.getElementById('cal-1lb').value : 'N/A',
-                c5lb: ext === 'UPPER' ? document.getElementById('cal-5lb').value : 'N/A',
-                c10lb: ext === 'UPPER' ? document.getElementById('cal-10lb').value : 'N/A',
-                strainReading: ext === 'UPPER' ? document.getElementById('cal-reading').value : 'N/A',
+                c0lb: ext === 'UPPER' ? (document.getElementById('cal-0lb').value || 'N/A') : 'N/A',
+                c1lb: ext === 'UPPER' ? (document.getElementById('cal-1lb').value || 'N/A') : 'N/A',
+                c5lb: ext === 'UPPER' ? (document.getElementById('cal-5lb').value || 'N/A') : 'N/A',
+                c10lb: ext === 'UPPER' ? (document.getElementById('cal-10lb').value || 'N/A') : 'N/A',
+                strainReading: ext === 'UPPER' ? (document.getElementById('cal-reading').value || 'N/A') : 'N/A',
                 comments: document.getElementById('test-comments').value.toUpperCase()
             };
 
@@ -409,6 +428,9 @@
         }
 
         function openFailedForReprocess(serial, mac, extremity, side) {
+            const confirmReprocess = confirm(`Would you like to re-test and process failed handle ${serial}?`);
+            if (!confirmReprocess) return; // Stop if user clicks Cancel
+
             switchTab('testing');
             document.getElementById('test-extremity').value = extremity;
             handleExtremityChange();
@@ -426,6 +448,10 @@
                 alert("ERROR: Left Handle and Right Handle serial numbers cannot be the same!");
                 return;
             }
+
+            // Submission confirmation pop-up
+            const confirmSubmit = confirm("Would you like to submit and complete this kit assembly?");
+            if (!confirmSubmit) return; // Stop submission if user clicks Cancel
 
             const btn = document.getElementById('btn-submit-kit');
             const btnText = document.getElementById('btn-text-kit');
