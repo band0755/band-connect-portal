@@ -100,7 +100,6 @@
     </header>
 
     <div class="main-wrapper">
-        <!-- LOGIN SCREEN -->
         <div id="login-screen" class="card" style="max-width: 450px; margin: 0 auto; text-align: center;">
             <h2>Workstation Authentication</h2>
             <p class="subtitle">Enter your secure portal password</p>
@@ -114,7 +113,6 @@
             <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
         </div>
 
-        <!-- MAIN DASHBOARD -->
         <div id="dashboard-screen" class="card hidden">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('testing')">1. Handle Testing</button>
@@ -122,7 +120,6 @@
                 <button class="nav-tab" onclick="switchTab('failed')">3. Failed Tests</button>
             </div>
 
-            <!-- TAB 1: HANDLE TESTING -->
             <div id="tab-testing">
                 <h2>Handle Bench Testing</h2>
                 <p class="subtitle">Log diagnostic results and strain calibrations.</p>
@@ -194,7 +191,6 @@
                 </form>
             </div>
 
-            <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
                 <p class="subtitle">Pack kit box by entering verified left and right handle serial numbers.</p>
@@ -239,7 +235,6 @@
                 </form>
             </div>
 
-            <!-- TAB 3: FAILED TESTS -->
             <div id="tab-failed" class="hidden">
                 <h2>Failed Tests Inventory</h2>
                 <p class="subtitle">Review and re-test handles that failed previous component checks.</p>
@@ -324,7 +319,7 @@
             e.preventDefault();
             const ext = document.getElementById('test-extremity').value;
 
-            // Check for missing strain calibration weights on Upper Extremity
+            // Check if any strain calibration block is left unfilled on Upper Extremity
             if (ext === 'UPPER') {
                 const c0 = document.getElementById('cal-0lb').value.trim();
                 const c1 = document.getElementById('cal-1lb').value.trim();
@@ -333,7 +328,7 @@
                 const reading = document.getElementById('cal-reading').value.trim();
 
                 if (!c0 || !c1 || !c5 || !c10 || !reading) {
-                    const confirmCal = confirm("Strain calibration weights are missing! Are you sure you want to continue?");
+                    const confirmCal = confirm("Strain calibration values are missing! Are you sure you want to continue?");
                     if (!confirmCal) return;
                 }
             }
@@ -381,12 +376,12 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(() => {
-                failedTestsCache = null; // Clear cache on new test submission
                 if (chkPass) {
                     alert("Handle Test PASSED & recorded!");
                 } else {
                     alert("Test FAILED (Unchecked component). Moved to Failed Tests folder!");
                 }
+                failedTestsCache = null; // Clear cache on new test submit
                 document.getElementById('testing-form').reset();
                 handleExtremityChange();
                 btn.disabled = false;
@@ -407,8 +402,8 @@
             }
 
             container.innerHTML = `
-                <div style="text-align: center; padding: 25px; color: var(--text-muted);">
-                    <div class="spinner" style="margin: 0 auto 12px auto; width: 24px; height: 24px;"></div>
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    <div class="spinner" style="margin: 0 auto 10px auto; width: 24px; height: 24px;"></div>
                     Fetching failed records from Google Sheets...
                 </div>
             `;
@@ -420,7 +415,7 @@
                     renderFailedList(failedTestsCache);
                 })
                 .catch(() => { 
-                    container.innerHTML = "<p style='color: var(--danger); text-align: center;'>Error loading failed tests. Click refresh to try again.</p>"; 
+                    container.innerHTML = "<p style='color: var(--danger); text-align: center;'>Error loading failed tests. Please try again.</p>"; 
                 });
         }
 
@@ -428,8 +423,8 @@
             const container = document.getElementById('failed-list');
             if (failedItems.length > 0) {
                 let html = `
-                    <div style="text-align: right; margin-bottom: 12px;">
-                        <button type="button" onclick="loadFailedTests(true)" style="width: auto; padding: 6px 14px; font-size: 12px; background: transparent; border: 1px solid var(--primary-purple); color: var(--text-light);">
+                    <div style="text-align: right; margin-bottom: 10px;">
+                        <button type="button" onclick="loadFailedTests(true)" style="width: auto; padding: 6px 12px; font-size: 11px; background: transparent; border: 1px solid var(--primary-purple); color: var(--text-light);">
                             ↻ Refresh List
                         </button>
                     </div>
