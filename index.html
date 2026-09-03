@@ -118,8 +118,8 @@
         <div id="dashboard-screen" class="card hidden">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('testing')">1. Handle Testing</button>
-                <button class="nav-tab" onclick="switchTab('failed')">2. Failed Tests</button>
-                <button class="nav-tab" onclick="switchTab('assembly')">3. Kit Assembly</button>
+                <button class="nav-tab" onclick="switchTab('assembly')">2. Kit Assembly</button>
+                <button class="nav-tab" onclick="switchTab('failed')">3. Failed Tests</button>
             </div>
 
             <!-- TAB 1: HANDLE TESTING -->
@@ -194,14 +194,7 @@
                 </form>
             </div>
 
-            <!-- TAB 2: FAILED TESTS -->
-            <div id="tab-failed" class="hidden">
-                <h2>Failed Tests Inventory</h2>
-                <p class="subtitle">Review and re-test handles that failed previous component checks.</p>
-                <div id="failed-list">Loading failed tests...</div>
-            </div>
-
-            <!-- TAB 3: KIT ASSEMBLY -->
+            <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
                 <p class="subtitle">Pack kit box by entering verified left and right handle serial numbers.</p>
@@ -245,6 +238,13 @@
                     </button>
                 </form>
             </div>
+
+            <!-- TAB 3: FAILED TESTS -->
+            <div id="tab-failed" class="hidden">
+                <h2>Failed Tests Inventory</h2>
+                <p class="subtitle">Review and re-test handles that failed previous component checks.</p>
+                <div id="failed-list">Loading failed tests...</div>
+            </div>
         </div>
     </div>
 
@@ -273,16 +273,16 @@
         function switchTab(tab) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-testing').classList.add('hidden');
-            document.getElementById('tab-failed').classList.add('hidden');
             document.getElementById('tab-assembly').classList.add('hidden');
+            document.getElementById('tab-failed').classList.add('hidden');
 
             if (tab === 'testing') {
                 document.getElementById('tab-testing').classList.remove('hidden');
+            } else if (tab === 'assembly') {
+                document.getElementById('tab-assembly').classList.remove('hidden');
             } else if (tab === 'failed') {
                 document.getElementById('tab-failed').classList.remove('hidden');
                 loadFailedTests();
-            } else if (tab === 'assembly') {
-                document.getElementById('tab-assembly').classList.remove('hidden');
             }
             event.target.classList.add('active');
         }
@@ -410,7 +410,6 @@
             const leftVal = document.getElementById('asm-leftserial').value.trim().toUpperCase();
             const rightVal = document.getElementById('asm-rightserial').value.trim().toUpperCase();
 
-            // Error check for duplicate left/right values
             if (leftVal === rightVal) {
                 alert("ERROR: Left Handle and Right Handle serial numbers cannot be the same!");
                 return;
