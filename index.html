@@ -121,6 +121,11 @@
             border-radius: 6px;
             color: var(--text-light);
             font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        input#portal-password {
+            text-transform: none; /* Keep password normal casing */
         }
 
         input:focus, select:focus, textarea:focus {
@@ -167,10 +172,33 @@
             font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         button:hover {
             background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Spinner Loading Animation */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .error-msg {
@@ -236,14 +264,6 @@
             accent-color: var(--primary-purple);
         }
 
-        .loading {
-            text-align: center;
-            font-style: italic;
-            color: var(--text-muted);
-            margin-top: 12px;
-            font-size: 13px;
-        }
-
         select option {
             background-color: var(--bg-dark);
             color: var(--text-light);
@@ -260,6 +280,7 @@
     </header>
 
     <div class="main-wrapper">
+        <!-- LOGIN SCREEN -->
         <div id="login-screen" class="card" style="max-width: 450px; margin: 0 auto; text-align: center;">
             <h2>Workstation Authentication</h2>
             <p class="subtitle">Enter your secure portal password</p>
@@ -273,12 +294,14 @@
             <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
         </div>
 
+        <!-- MAIN DASHBOARD -->
         <div id="dashboard-screen" class="card hidden">
             <div class="nav-tabs">
                 <button class="nav-tab active" onclick="switchTab('testing')">1. Handle Bench Testing</button>
                 <button class="nav-tab" onclick="switchTab('assembly')">2. Kit Assembly</button>
             </div>
 
+            <!-- TAB 1: HANDLE TESTING -->
             <div id="tab-testing">
                 <h2>Handle Bench Testing</h2>
                 <p class="subtitle">Log individual handle diagnostic results and sensor calibrations.</p>
@@ -337,11 +360,13 @@
                         <textarea id="test-comments" rows="2" placeholder="Optional notes..."></textarea>
                     </div>
 
-                    <button type="submit" id="btn-submit-test">Submit Handle Test Record</button>
-                    <p id="test-status-msg" class="loading hidden">Saving test record to Google Sheet...</p>
+                    <button type="submit" id="btn-submit-test">
+                        <span id="btn-text-test">Submit Handle Test Record</span>
+                    </button>
                 </form>
             </div>
 
+            <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
                 <p class="subtitle">Select verified handles from testing inventory and pack kit box.</p>
@@ -396,8 +421,9 @@
                         <textarea id="asm-comments" rows="2" placeholder="Optional assembly remarks..."></textarea>
                     </div>
 
-                    <button type="submit" id="btn-submit-kit">Complete & Save Kit Assembly</button>
-                    <p id="asm-status-msg" class="loading hidden">Saving kit record...</p>
+                    <button type="submit" id="btn-submit-kit">
+                        <span id="btn-text-kit">Complete & Save Kit Assembly</span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -532,14 +558,16 @@
         function submitHandleTest(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit-test');
-            const msg = document.getElementById('test-status-msg');
+            const btnText = document.getElementById('btn-text-test');
+            
+            // Show loading spinner
             btn.disabled = true;
-            msg.classList.remove('hidden');
+            btnText.innerHTML = '<div class="spinner"></div> Submitting Test...';
 
             const payload = {
                 type: "handle_test",
-                serial: document.getElementById('test-serial').value,
-                mac: document.getElementById('test-mac').value,
+                serial: document.getElementById('test-serial').value.toUpperCase(),
+                mac: document.getElementById('test-mac').value.toUpperCase(),
                 led: document.getElementById('chk-led').checked ? "P" : "F",
                 buzzer: document.getElementById('chk-buzzer').checked ? "P" : "F",
                 haptic1: document.getElementById('chk-haptic1').checked ? "P" : "F",
@@ -551,7 +579,7 @@
                 c5lb: document.getElementById('cal-5lb').value,
                 c10lb: document.getElementById('cal-10lb').value,
                 strainReading: document.getElementById('cal-reading').value,
-                comments: document.getElementById('test-comments').value
+                comments: document.getElementById('test-comments').value.toUpperCase()
             };
 
             fetch(APPS_SCRIPT_URL, {
@@ -563,27 +591,29 @@
                 alert("Handle test recorded successfully!");
                 document.getElementById('testing-form').reset();
                 btn.disabled = false;
-                msg.classList.add('hidden');
+                btnText.innerText = "Submit Handle Test Record";
             }).catch(err => {
                 alert("Error saving test record.");
                 btn.disabled = false;
-                msg.classList.add('hidden');
+                btnText.innerText = "Submit Handle Test Record";
             });
         }
 
         function submitKitAssembly(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit-kit');
-            const msg = document.getElementById('asm-status-msg');
-            btn.disabled = true;
-            msg.classList.remove('hidden');
+            const btnText = document.getElementById('btn-text-kit');
 
-            const leftVal = document.getElementById('asm-leftserial').value;
-            const rightVal = document.getElementById('asm-rightserial').value;
+            // Show loading spinner
+            btn.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Saving Assembly...';
+
+            const leftVal = document.getElementById('asm-leftserial').value.toUpperCase();
+            const rightVal = document.getElementById('asm-rightserial').value.toUpperCase();
 
             const payload = {
                 type: "kit_assembly",
-                kitSerial: document.getElementById('asm-kitserial').value,
+                kitSerial: document.getElementById('asm-kitserial').value.toUpperCase(),
                 leftSerial: leftVal,
                 rightSerial: rightVal,
                 carabinerReg: document.getElementById('acc-reg-carabiner').checked,
@@ -595,7 +625,7 @@
                 guide: document.getElementById('acc-guide').checked,
                 label: document.getElementById('acc-label').checked,
                 refurb: document.getElementById('asm-refurb').checked,
-                comments: document.getElementById('asm-comments').value
+                comments: document.getElementById('asm-comments').value.toUpperCase()
             };
 
             fetch(APPS_SCRIPT_URL, {
@@ -611,11 +641,11 @@
                 document.getElementById('assembly-form').reset();
                 renderDropdowns();
                 btn.disabled = false;
-                msg.classList.add('hidden');
+                btnText.innerText = "Complete & Save Kit Assembly";
             }).catch(err => {
                 alert("Error saving kit assembly.");
                 btn.disabled = false;
-                msg.classList.add('hidden');
+                btnText.innerText = "Complete & Save Kit Assembly";
             });
         }
     </script>
