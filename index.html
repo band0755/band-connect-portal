@@ -350,14 +350,14 @@
             let allCompPassed = true;
             chkBoxes.forEach(chk => { if (!chk.checked) allCompPassed = false; });
 
-            let calIncomplete = false;
-            if (ext === 'UPPER' && !reading) {
-                calIncomplete = true;
-            }
+            let calIncomplete = (ext === 'UPPER' && !reading);
 
-            if (!allCompPassed || calIncomplete) {
-                const warnConfirm = confirm("WARNING: Functional checks or strain calibration reading are incomplete! Submitting now will mark this test as FAILED and route it to Failed Tests. Do you want to proceed?");
+            if (!allCompPassed) {
+                const warnConfirm = confirm("WARNING: Functional checks are incomplete! Submitting now will mark this device as FAILED and route it to Failed Tests. Do you want to proceed?");
                 if (!warnConfirm) return;
+            } else if (calIncomplete) {
+                const warnCal = confirm("Strain calibration reading is missing! Are you sure you want to continue?");
+                if (!warnCal) return;
             } else {
                 const confirmSubmit = confirm("Would you like to submit this handle test record?");
                 if (!confirmSubmit) return;
