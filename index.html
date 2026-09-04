@@ -41,7 +41,7 @@
         .form-group { margin-bottom: 20px; text-align: left; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: var(--text-light); }
 
-        input[type="password"], input[type="text"], input[type="number"], select, textarea {
+        input[type="password"], input[type="text"], select, textarea {
             width: 100%; padding: 12px 14px; background-color: var(--input-bg);
             border: 1px solid var(--card-border); border-radius: 6px; color: var(--text-light);
             font-size: 14px; text-transform: uppercase;
@@ -167,20 +167,9 @@
                         <label class="checkbox-label"><input type="checkbox" id="chk-charge" class="chk-comp"> Charge Circuit Pass</label>
                     </div>
 
-                    <div id="calibration-section">
-                        <label style="margin-bottom: 8px;">Strain Calibration Weights (Numeric Values Required)</label>
-                        <div class="grid-2">
-                            <div class="form-group"><label>0 LB Measurement</label><input type="text" id="cal-0lb" placeholder="Numeric value..."></div>
-                            <div class="form-group"><label>1 LB Measurement</label><input type="text" id="cal-1lb" placeholder="Numeric value..."></div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group"><label>5 LB Measurement</label><input type="text" id="cal-5lb" placeholder="Numeric value..."></div>
-                            <div class="form-group"><label>10 LB Measurement</label><input type="text" id="cal-10lb" placeholder="Numeric value..."></div>
-                        </div>
-                        <div class="form-group">
-                            <label>Calibrated Strain Reading</label>
-                            <input type="text" id="cal-reading" placeholder="Enter strain value reading...">
-                        </div>
+                    <div id="calibration-section" class="form-group">
+                        <label>Calibrated Strain Reading</label>
+                        <input type="text" id="cal-reading" placeholder="Enter strain value reading...">
                     </div>
 
                     <div class="form-group">
@@ -197,23 +186,33 @@
             <!-- TAB 2: KIT ASSEMBLY -->
             <div id="tab-assembly" class="hidden">
                 <h2>Kit Box Assembly</h2>
-                <p class="subtitle">Pack kit box by entering verified handle serial numbers.</p>
+                <p class="subtitle">Pack kit box by verifying accessories and device serial numbers.</p>
                 
                 <form id="assembly-form" onsubmit="submitKitAssembly(event)">
+                    <!-- 1. Device Type Selection -->
                     <div class="form-group">
-                        <label>Extremity Type</label>
+                        <label>Device Type Selection</label>
                         <select id="asm-extremity" required onchange="handleKitExtremityChange()">
-                            <option value="">-- Select Extremity --</option>
+                            <option value="">-- Select Device Type --</option>
                             <option value="UPPER">Upper Extremity</option>
                             <option value="LOWER">Lower Extremity</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>Kit Box Serial #</label>
-                        <input type="text" id="asm-kitserial" required placeholder="Scan Kit Box Serial Label...">
+                    <!-- 2. Box Content & Accessory Checklist -->
+                    <label style="margin-bottom: 8px;">Box Content & Accessory Checklist (All Required)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner" class="asm-chk"> 2 Regular Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner" class="asm-chk"> 2 Swivel Carabiners</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-phone" class="asm-chk"> Phone Holder</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-door" class="asm-chk"> Door Anchor</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-cables" class="asm-chk"> 2 Charging Cables</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-block" class="asm-chk"> Charging Block</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-guide" class="asm-chk"> Quick Start Guide</label>
+                        <label class="checkbox-label"><input type="checkbox" id="acc-label" class="asm-chk"> Kit Serial Label</label>
                     </div>
 
+                    <!-- 3. Device Serial Number(s) -->
                     <div class="grid-2" id="asm-serial-grid">
                         <div class="form-group" id="group-left-serial">
                             <label id="lbl-left-serial">Left Handle Serial #</label>
@@ -225,16 +224,10 @@
                         </div>
                     </div>
 
-                    <label style="margin-bottom: 8px;">Box Contents & Accessories Checklist (All Required)</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner" class="asm-chk"> 2 Regular Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner" class="asm-chk"> 2 Swivel Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-phone" class="asm-chk"> Phone Holder</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-door" class="asm-chk"> Door Anchor</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-cables" class="asm-chk"> 2 Charging Cables</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-block" class="asm-chk"> Charging Block</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-guide" class="asm-chk"> Quick Start Guide</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-label" class="asm-chk"> Kit Serial Label</label>
+                    <!-- 4. Kit Serial Number (Final Entry) -->
+                    <div class="form-group">
+                        <label>Kit Serial Number</label>
+                        <input type="text" id="asm-kitserial" required placeholder="Scan Kit Box Serial Label...">
                     </div>
 
                     <div class="form-group">
@@ -311,7 +304,7 @@
                 sideSelect.required = true;
                 sideSelect.value = "";
                 
-                calSection.querySelectorAll('input').forEach(i => i.disabled = false);
+                calSection.querySelector('input').disabled = false;
                 calSection.style.opacity = '1';
             } else if (ext === 'LOWER') {
                 sideGroup.classList.remove('hidden');
@@ -320,7 +313,8 @@
                 sideSelect.required = false;
                 sideSelect.value = "LEFT";
                 
-                calSection.querySelectorAll('input').forEach(i => { i.disabled = true; i.value = ''; });
+                calSection.querySelector('input').disabled = true;
+                calSection.querySelector('input').value = '';
                 calSection.style.opacity = '0.4';
             } else {
                 sideGroup.classList.add('hidden');
@@ -350,37 +344,19 @@
         function submitHandleTest(e) {
             e.preventDefault();
             const ext = document.getElementById('test-extremity').value;
-
-            const c0 = document.getElementById('cal-0lb').value.trim();
-            const c1 = document.getElementById('cal-1lb').value.trim();
-            const c5 = document.getElementById('cal-5lb').value.trim();
-            const c10 = document.getElementById('cal-10lb').value.trim();
             const reading = document.getElementById('cal-reading').value.trim();
 
-            // 1. Numeric validation for the 4 weight blocks if filled (for Upper Extremity)
-            if (ext === 'UPPER') {
-                const weights = [c0, c1, c5, c10];
-                for (let w of weights) {
-                    if (w !== "" && isNaN(w)) {
-                        alert("ERROR: Measurement weight blocks must contain numeric values only (e.g., 0, 1.2, 5)!");
-                        return;
-                    }
-                }
-            }
-
-            // 2. Check if functional checks or calibration blocks are missing
             const chkBoxes = document.querySelectorAll('.chk-comp');
             let allCompPassed = true;
             chkBoxes.forEach(chk => { if (!chk.checked) allCompPassed = false; });
 
             let calIncomplete = false;
-            if (ext === 'UPPER' && (!c0 || !c1 || !c5 || !c10 || !reading)) {
+            if (ext === 'UPPER' && !reading) {
                 calIncomplete = true;
             }
 
-            // Warning if any highlighted section is incomplete
             if (!allCompPassed || calIncomplete) {
-                const warnConfirm = confirm("WARNING: Functional checks or strain calibration values are incomplete! Submitting now will mark this test as FAILED and route it to Failed Tests. Do you want to proceed?");
+                const warnConfirm = confirm("WARNING: Functional checks or strain calibration reading are incomplete! Submitting now will mark this test as FAILED and route it to Failed Tests. Do you want to proceed?");
                 if (!warnConfirm) return;
             } else {
                 const confirmSubmit = confirm("Would you like to submit this handle test record?");
@@ -392,12 +368,10 @@
             btn.disabled = true;
             btnText.innerHTML = '<div class="spinner"></div> Submitting Test...';
 
-            const sideVal = document.getElementById('test-side').value;
-
             const payload = {
                 type: "handle_test",
                 extremity: ext,
-                side: sideVal,
+                side: document.getElementById('test-side').value,
                 serial: document.getElementById('test-serial').value.toUpperCase(),
                 mac: document.getElementById('test-mac').value.toUpperCase(),
                 led: document.getElementById('chk-led').checked ? "P" : "F",
@@ -407,10 +381,6 @@
                 str: document.getElementById('chk-str').checked ? "P" : "F",
                 charge: document.getElementById('chk-charge').checked ? "P" : "F",
                 overallResult: (allCompPassed && !calIncomplete) ? "P" : "F",
-                c0lb: ext === 'UPPER' ? (c0 || 'N/A') : 'N/A',
-                c1lb: ext === 'UPPER' ? (c1 || 'N/A') : 'N/A',
-                c5lb: ext === 'UPPER' ? (c5 || 'N/A') : 'N/A',
-                c10lb: ext === 'UPPER' ? (c10 || 'N/A') : 'N/A',
                 strainReading: ext === 'UPPER' ? (reading || 'N/A') : 'N/A',
                 comments: document.getElementById('test-comments').value.toUpperCase()
             };
