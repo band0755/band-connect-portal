@@ -1,544 +1,164 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Band Connect - Manufacturing & Assembly Portal</title>
-    <style>
-        :root {
-            --bg-dark: #121024;
-            --card-bg: #1a1736;
-            --card-border: #2d2657;
-            --primary-purple: #7b4dff;
-            --primary-hover: #6536e0;
-            --text-light: #ffffff;
-            --text-muted: #a09cb0;
-            --success: #28a745;
-            --danger: #dc3545;
-            --input-bg: #121024;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-light); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-
-        header {
-            width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--card-border); background-color: var(--bg-dark);
-        }
-        .brand-logo { font-size: 22px; font-weight: bold; color: var(--text-light); }
-        .brand-logo span { color: var(--primary-purple); margin-left: 4px; }
-        .portal-badge {
-            font-size: 13px; background: rgba(123, 77, 255, 0.15); color: var(--primary-purple);
-            padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(123, 77, 255, 0.3); font-weight: 600;
-        }
-
-        .main-wrapper { width: 100%; max-width: 800px; padding: 40px 20px; }
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); padding: 35px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); }
-        h2 { color: var(--text-light); margin-bottom: 8px; font-size: 22px; }
-        .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
-        .hidden { display: none !important; }
-
-        .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 13px; color: var(--text-light); }
-
-        input[type="password"], input[type="text"], select, textarea {
-            width: 100%; padding: 12px 14px; background-color: var(--input-bg);
-            border: 1px solid var(--card-border); border-radius: 6px; color: var(--text-light);
-            font-size: 14px; text-transform: uppercase;
-        }
-        input#portal-password { text-transform: none; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-purple); box-shadow: 0 0 6px rgba(123, 77, 255, 0.3); }
-
-        .password-container { position: relative; display: flex; align-items: center; }
-        .password-container input { padding-right: 45px; }
-        .toggle-password {
-            position: absolute; right: 12px; background: none; border: none; color: var(--text-muted);
-            cursor: pointer; font-size: 13px; width: auto; padding: 4px;
-        }
-
-        button {
-            width: 100%; padding: 14px; background-color: var(--primary-purple); color: white;
-            border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer;
-            transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        button:hover { background-color: var(--primary-hover); }
-        button:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        .spinner { width: 18px; height: 18px; border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top-color: #ffffff; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .error-msg { color: var(--danger); font-size: 13px; margin-top: 10px; text-align: center; }
-
-        .nav-tabs { display: flex; margin-bottom: 25px; border-bottom: 1px solid var(--card-border); }
-        .nav-tab {
-            flex: 1; padding: 14px; text-align: center; background: none; border: none;
-            font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-        }
-        .nav-tab.active { color: var(--text-light); border-bottom-color: var(--primary-purple); }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .checkbox-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px;
-            background: rgba(18, 16, 36, 0.6); padding: 18px; border-radius: 8px; border: 1px solid var(--card-border);
-        }
-        .checkbox-label { display: flex; align-items: center; font-weight: normal; font-size: 13px; color: var(--text-light); cursor: pointer; }
-        .checkbox-label input { margin-right: 10px; transform: scale(1.1); accent-color: var(--primary-purple); }
-
-        .failed-card {
-            background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.3);
-            border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex;
-            justify-content: space-between; align-items: center;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <div class="brand-logo">band<span>connect</span></div>
-        <div class="portal-badge">Manufacturing Portal</div>
-    </header>
-
-    <div class="main-wrapper">
-        <div id="login-screen" class="card" style="max-width: 450px; margin: 0 auto; text-align: center;">
-            <h2>Workstation Authentication</h2>
-            <p class="subtitle">Enter your secure portal password</p>
-            <div class="form-group">
-                <div class="password-container">
-                    <input type="password" id="portal-password" placeholder="Enter password..." onkeydown="if(event.key === 'Enter') handleLogin()">
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">Show</button>
-                </div>
-            </div>
-            <button type="button" onclick="handleLogin()">Access Portal</button>
-            <p id="login-error" class="error-msg hidden">Incorrect password. Please try again.</p>
-        </div>
-
-        <div id="dashboard-screen" class="card hidden">
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="switchTab('testing')">1. Device Testing</button>
-                <button class="nav-tab" onclick="switchTab('assembly')">2. Kit Assembly</button>
-                <button class="nav-tab" onclick="switchTab('failed')">3. Failed Tests</button>
-            </div>
-
-            <div id="tab-testing">
-                <h2>Device Bench Testing</h2>
-                <p class="subtitle">Log diagnostic results and strain calibrations.</p>
-                
-                <form id="testing-form" onsubmit="submitHandleTest(event)">
-                    <div class="form-group">
-                        <label>Extremity Type</label>
-                        <select id="test-extremity" required onchange="handleExtremityChange()">
-                            <option value="">-- Select Extremity --</option>
-                            <option value="UPPER">Upper Extremity</option>
-                            <option value="LOWER">Lower Extremity</option>
-                        </select>
-                    </div>
-
-                    <div id="side-selection-group" class="form-group hidden">
-                        <label id="side-label">Side</label>
-                        <select id="test-side">
-                            <option value="">-- Select Side --</option>
-                            <option value="LEFT">LEFT</option>
-                            <option value="RIGHT">RIGHT</option>
-                        </select>
-                    </div>
-
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label>Device Serial No.</label>
-                            <input type="text" id="test-serial" required placeholder="Scan Device Serial...">
-                        </div>
-                        <div class="form-group">
-                            <label>Device MAC ID</label>
-                            <input type="text" id="test-mac" required placeholder="00:80:E1:...">
-                        </div>
-                    </div>
-
-                    <label style="margin-bottom: 8px;">Functional Component Checks</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-label"><input type="checkbox" id="chk-led" class="chk-comp"> LED R/G/B Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-buzzer" class="chk-comp"> Buzzer Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic1" class="chk-comp"> Haptic 1 Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-haptic2" class="chk-comp"> Haptic 2 Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-str" class="chk-comp"> Strain Circuit Pass</label>
-                        <label class="checkbox-label"><input type="checkbox" id="chk-charge" class="chk-comp"> Charge Circuit Pass</label>
-                    </div>
-
-                    <div id="calibration-section" class="form-group">
-                        <label>Calibrated Strain Reading</label>
-                        <input type="text" id="cal-reading" placeholder="Enter strain value reading...">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Comments / Notes</label>
-                        <textarea id="test-comments" rows="2" placeholder="Optional notes..."></textarea>
-                    </div>
-
-                    <button type="submit" id="btn-submit-test">
-                        <span id="btn-text-test">Submit Device Test Record</span>
-                    </button>
-                </form>
-            </div>
-
-            <div id="tab-assembly" class="hidden">
-                <h2>Kit Box Assembly</h2>
-                <p class="subtitle">Pack kit box by verifying accessories and device serial numbers.</p>
-                
-                <form id="assembly-form" onsubmit="submitKitAssembly(event)">
-                    <div class="form-group">
-                        <label>Device Type Selection</label>
-                        <select id="asm-extremity" required onchange="handleKitExtremityChange()">
-                            <option value="">-- Select Device Type --</option>
-                            <option value="UPPER">Upper Extremity</option>
-                            <option value="LOWER">Lower Extremity</option>
-                        </select>
-                    </div>
-
-                    <label style="margin-bottom: 8px;">Box Content & Accessory Checklist (All Required)</label>
-                    <div class="checkbox-grid">
-                        <label class="checkbox-label"><input type="checkbox" id="acc-reg-carabiner" class="asm-chk"> 2 Regular Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-swiv-carabiner" class="asm-chk"> 2 Swivel Carabiners</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-phone" class="asm-chk"> Phone Holder</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-door" class="asm-chk"> Door Anchor</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-cables" class="asm-chk"> 2 Charging Cables</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-block" class="asm-chk"> Charging Block</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-guide" class="asm-chk"> Quick Start Guide</label>
-                        <label class="checkbox-label"><input type="checkbox" id="acc-label" class="asm-chk"> Kit Serial Label</label>
-                    </div>
-
-                    <div class="grid-2" id="asm-serial-grid">
-                        <div class="form-group" id="group-left-serial">
-                            <label id="lbl-left-serial">Left Device Serial #</label>
-                            <input type="text" id="asm-leftserial" required placeholder="Enter/Scan Left Serial...">
-                        </div>
-                        <div class="form-group" id="group-right-serial">
-                            <label>Right Device Serial #</label>
-                            <input type="text" id="asm-rightserial" required placeholder="Enter/Scan Right Serial...">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Kit Serial Number</label>
-                        <input type="text" id="asm-kitserial" required placeholder="Scan Kit Box Serial Label...">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Assembly Comments / Notes</label>
-                        <textarea id="asm-comments" rows="2" placeholder="Optional assembly remarks..."></textarea>
-                    </div>
-
-                    <button type="submit" id="btn-submit-kit">
-                        <span id="btn-text-kit">Complete & Save Kit Assembly</span>
-                    </button>
-                </form>
-            </div>
-
-            <div id="tab-failed" class="hidden">
-                <h2>Failed Tests Inventory</h2>
-                <p class="subtitle">Review and re-test devices that failed previous component checks.</p>
-                <div id="failed-list">Loading failed tests...</div>
-            </div>
-        </div>
+<!-- ================================================================= -->
+<!-- HANDLE TESTING FORM SECTION                                       -->
+<!-- ================================================================= -->
+<form id="handleTestingForm" onsubmit="handleFormSubmit(event)">
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" class="form-control" required>
     </div>
+    <div class="form-group col-md-6">
+      <label for="time">Time</label>
+      <input type="time" id="time" name="time" class="form-control" required>
+    </div>
+  </div>
 
-    <script>
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwHJNH8kqTzWCfAQXhOJPsXaZl13SxVR2FHApTUA5uDgdZRZuGxF_2YluKxGwe1OENbZA/exec";
-        let failedTestsCache = null;
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="serialNo">Serial No.</label>
+      <input type="text" id="serialNo" name="serialNo" class="form-control" required>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="macId">Device MAC ID</label>
+      <input type="text" id="macId" name="macId" class="form-control" required>
+    </div>
+  </div>
 
-        function togglePasswordVisibility() {
-            const pwdInput = document.getElementById('portal-password');
-            const toggleBtn = document.querySelector('.toggle-password');
-            if (pwdInput.type === 'password') {
-                pwdInput.type = 'text'; toggleBtn.innerText = 'Hide';
-            } else {
-                pwdInput.type = 'password'; toggleBtn.innerText = 'Show';
-            }
-        }
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label for="extremity">Extremity</label>
+      <select id="extremity" name="extremity" class="form-control" required>
+        <option value="">Select Extremity...</option>
+        <option value="UPPER">UPPER</option>
+        <option value="LOWER">LOWER</option>
+      </select>
+    </div>
+    <div class="form-group col-md-4">
+      <label for="side">Side</label>
+      <select id="side" name="side" class="form-control" required>
+        <option value="">Select Side...</option>
+        <option value="LEFT">LEFT</option>
+        <option value="RIGHT">RIGHT</option>
+      </select>
+    </div>
+    <!-- NEW FIRMWARE VERSION FIELD -->
+    <div class="form-group col-md-4">
+      <label for="firmwareVersion">Firmware Version</label>
+      <input type="text" id="firmwareVersion" name="firmwareVersion" class="form-control" placeholder="e.g. V2 11.0">
+    </div>
+  </div>
 
-        function handleLogin() {
-            if (document.getElementById('portal-password').value === "Bayatronics2026!") {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('dashboard-screen').classList.remove('hidden');
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        }
+  <div class="form-row">
+    <div class="form-group col-md-3">
+      <label for="led">LED R/G/B</label>
+      <select id="led" name="led" class="form-control">
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+    <div class="form-group col-md-3">
+      <label for="buzzer">BUZZER</label>
+      <select id="buzzer" name="buzzer" class="form-control">
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+    <div class="form-group col-md-3">
+      <label for="haptic1">HAPTIC1</label>
+      <select id="haptic1" name="haptic1" class="form-control">
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+    <div class="form-group col-md-3">
+      <label for="haptic2">HAPTIC2</label>
+      <select id="haptic2" name="haptic2" class="form-control">
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+  </div>
 
-        function switchTab(tab) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-testing').classList.add('hidden');
-            document.getElementById('tab-assembly').classList.add('hidden');
-            document.getElementById('tab-failed').classList.add('hidden');
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label for="strGauge">STR GAUGE</label>
+      <select id="strGauge" name="strGauge" class="form-control">
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+    <div class="form-group col-md-4">
+      <label for="charge">CHARGE</label>
+      <select id="charge" name="charge" class="form-control">
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+    <div class="form-group col-md-4">
+      <label for="result">RESULT</label>
+      <select id="result" name="result" class="form-control" required>
+        <option value="PASS">PASS</option>
+        <option value="FAIL">FAIL</option>
+      </select>
+    </div>
+  </div>
 
-            if (tab === 'testing') {
-                document.getElementById('tab-testing').classList.remove('hidden');
-            } else if (tab === 'assembly') {
-                document.getElementById('tab-assembly').classList.remove('hidden');
-            } else if (tab === 'failed') {
-                document.getElementById('tab-failed').classList.remove('hidden');
-                loadFailedTests();
-            }
-            event.target.classList.add('active');
-        }
+  <div class="form-row">
+    <div class="form-group col-md-4">
+      <label for="calibratedStrain1">Calibrated Strain Reading</label>
+      <input type="text" id="calibratedStrain1" name="calibratedStrain1" class="form-control">
+    </div>
+    <div class="form-group col-md-4">
+      <label for="tenLb">10 LB</label>
+      <input type="text" id="tenLb" name="tenLb" class="form-control">
+    </div>
+    <div class="form-group col-md-4">
+      <label for="calibratedStrain2">Calibrated Strain Reading .1</label>
+      <input type="text" id="calibratedStrain2" name="calibratedStrain2" class="form-control">
+    </div>
+  </div>
 
-        function handleExtremityChange() {
-            const ext = document.getElementById('test-extremity').value;
-            const sideGroup = document.getElementById('side-selection-group');
-            const sideLabel = document.getElementById('side-label');
-            const sideSelect = document.getElementById('test-side');
-            const calSection = document.getElementById('calibration-section');
+  <div class="form-group">
+    <label for="comments">Comments</label>
+    <textarea id="comments" name="comments" class="form-control" rows="2"></textarea>
+  </div>
 
-            if (ext === 'UPPER') {
-                sideGroup.classList.remove('hidden');
-                sideLabel.innerText = "Side (Upper Extremity)";
-                sideSelect.disabled = false;
-                sideSelect.required = true;
-                sideSelect.value = "";
-                
-                calSection.querySelector('input').disabled = false;
-                calSection.style.opacity = '1';
-            } else if (ext === 'LOWER') {
-                sideGroup.classList.remove('hidden');
-                sideLabel.innerText = "Side (Lower Extremity - Default)";
-                sideSelect.disabled = true;
-                sideSelect.required = false;
-                sideSelect.value = "LEFT";
-                
-                calSection.querySelector('input').disabled = true;
-                calSection.querySelector('input').value = '';
-                calSection.style.opacity = '0.4';
-            } else {
-                sideGroup.classList.add('hidden');
-                sideSelect.required = false;
-                sideSelect.value = "";
-            }
-        }
+  <button type="submit" class="btn btn-primary">Submit Bench Test</button>
+</form>
 
-        function handleKitExtremityChange() {
-            const ext = document.getElementById('asm-extremity').value;
-            const leftLabel = document.getElementById('lbl-left-serial');
-            const rightGroup = document.getElementById('group-right-serial');
-            const rightInput = document.getElementById('asm-rightserial');
+<script>
+function handleFormSubmit(event) {
+  event.preventDefault();
+  
+  const handleData = {
+    date: document.getElementById('date').value,
+    time: document.getElementById('time').value,
+    serialNo: document.getElementById('serialNo').value,
+    macId: document.getElementById('macId').value,
+    extremity: document.getElementById('extremity').value,
+    side: document.getElementById('side').value,
+    led: document.getElementById('led').value,
+    buzzer: document.getElementById('buzzer').value,
+    haptic1: document.getElementById('haptic1').value,
+    haptic2: document.getElementById('haptic2').value,
+    strGauge: document.getElementById('strGauge').value,
+    charge: document.getElementById('charge').value,
+    result: document.getElementById('result').value,
+    comments: document.getElementById('comments').value,
+    calibratedStrain1: document.getElementById('calibratedStrain1').value,
+    tenLb: document.getElementById('tenLb').value,
+    calibratedStrain2: document.getElementById('calibratedStrain2').value,
+    firmwareVersion: document.getElementById('firmwareVersion').value // Payload inclusion
+  };
 
-            if (ext === 'LOWER') {
-                leftLabel.innerText = "Device (Left) Serial #";
-                rightGroup.classList.add('hidden');
-                rightInput.required = false;
-                rightInput.value = "";
-            } else {
-                leftLabel.innerText = "Left Device Serial #";
-                rightGroup.classList.remove('hidden');
-                rightInput.required = true;
-            }
-        }
-
-        function submitHandleTest(e) {
-            e.preventDefault();
-            const ext = document.getElementById('test-extremity').value;
-            const reading = document.getElementById('cal-reading').value.trim();
-
-            const chkBoxes = document.querySelectorAll('.chk-comp');
-            let allCompPassed = true;
-            chkBoxes.forEach(chk => { if (!chk.checked) allCompPassed = false; });
-
-            let calIncomplete = (ext === 'UPPER' && !reading);
-
-            if (!allCompPassed) {
-                const warnConfirm = confirm("WARNING: Functional checks are incomplete! Submitting now will mark this device as FAILED and route it to Failed Tests. Do you want to proceed?");
-                if (!warnConfirm) return;
-            } else if (calIncomplete) {
-                const warnCal = confirm("Strain calibration reading is missing! Are you sure you want to continue?");
-                if (!warnCal) return;
-            } else {
-                const confirmSubmit = confirm("Would you like to submit this device test record?");
-                if (!confirmSubmit) return;
-            }
-
-            const btn = document.getElementById('btn-submit-test');
-            const btnText = document.getElementById('btn-text-test');
-            btn.disabled = true;
-            btnText.innerHTML = '<div class="spinner"></div> Submitting Test...';
-
-            const payload = {
-                type: "handle_test",
-                extremity: ext,
-                side: document.getElementById('test-side').value,
-                serial: document.getElementById('test-serial').value.toUpperCase(),
-                mac: document.getElementById('test-mac').value.toUpperCase(),
-                led: document.getElementById('chk-led').checked ? "P" : "F",
-                buzzer: document.getElementById('chk-buzzer').checked ? "P" : "F",
-                haptic1: document.getElementById('chk-haptic1').checked ? "P" : "F",
-                haptic2: document.getElementById('chk-haptic2').checked ? "P" : "F",
-                str: document.getElementById('chk-str').checked ? "P" : "F",
-                charge: document.getElementById('chk-charge').checked ? "P" : "F",
-                overallResult: (allCompPassed && !calIncomplete) ? "P" : "F",
-                strainReading: ext === 'UPPER' ? (reading || 'N/A') : 'N/A',
-                comments: document.getElementById('test-comments').value.toUpperCase()
-            };
-
-            fetch(APPS_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                if (allCompPassed && !calIncomplete) {
-                    alert("Device Test PASSED & recorded!");
-                } else {
-                    alert("Test FAILED. Updated in Failed Tests folder!");
-                }
-                failedTestsCache = null;
-                document.getElementById('testing-form').reset();
-                handleExtremityChange();
-                btn.disabled = false;
-                btnText.innerText = "Submit Device Test Record";
-            }).catch(err => {
-                alert("Error submitting test record.");
-                btn.disabled = false;
-                btnText.innerText = "Submit Device Test Record";
-            });
-        }
-
-        function loadFailedTests(forceRefresh = false) {
-            const container = document.getElementById('failed-list');
-
-            if (failedTestsCache && !forceRefresh) {
-                renderFailedList(failedTestsCache);
-                return;
-            }
-
-            container.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-                    <div class="spinner" style="margin: 0 auto 10px auto; width: 24px; height: 24px;"></div>
-                    Fetching failed records from Google Sheets...
-                </div>
-            `;
-
-            fetch(`${APPS_SCRIPT_URL}?action=getFailedTests`)
-                .then(res => res.json())
-                .then(data => {
-                    failedTestsCache = (data && data.failed) ? data.failed : [];
-                    renderFailedList(failedTestsCache);
-                })
-                .catch(() => { 
-                    container.innerHTML = "<p style='color: var(--danger); text-align: center;'>Error loading failed tests. Please try again.</p>"; 
-                });
-        }
-
-        function renderFailedList(failedItems) {
-            const container = document.getElementById('failed-list');
-            if (failedItems.length > 0) {
-                let html = `
-                    <div style="text-align: right; margin-bottom: 10px;">
-                        <button type="button" onclick="loadFailedTests(true)" style="width: auto; padding: 6px 12px; font-size: 11px; background: transparent; border: 1px solid var(--primary-purple); color: var(--text-light);">
-                            ↻ Refresh List
-                        </button>
-                    </div>
-                `;
-                failedItems.forEach(item => {
-                    html += `
-                        <div class="failed-card">
-                            <div>
-                                <strong>Serial: ${item.serial}</strong> (${item.extremity} ${item.side ? '- ' + item.side : ''})<br>
-                                <small style="color: var(--text-muted)">MAC: ${item.mac}</small>
-                            </div>
-                            <button type="button" onclick="openFailedForReprocess('${item.serial}', '${item.mac}', '${item.extremity}', '${item.side}')" style="width: auto; padding: 8px 16px; font-size: 12px;">
-                                Re-Test & Process
-                            </button>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            } else {
-                container.innerHTML = "<p style='color: var(--text-muted); text-align: center;'>No failed tests found.</p>";
-            }
-        }
-
-        function openFailedForReprocess(serial, mac, extremity, side) {
-            const confirmReprocess = confirm(`Would you like to re-test and process failed device ${serial}?`);
-            if (!confirmReprocess) return;
-
-            switchTab('testing');
-            document.getElementById('test-extremity').value = extremity;
-            handleExtremityChange();
-            if (extremity === 'UPPER') document.getElementById('test-side').value = side;
-            document.getElementById('test-serial').value = serial;
-            document.getElementById('test-mac').value = mac;
-        }
-
-        function submitKitAssembly(e) {
-            e.preventDefault();
-            const ext = document.getElementById('asm-extremity').value;
-            const leftVal = document.getElementById('asm-leftserial').value.trim().toUpperCase();
-            const rightVal = document.getElementById('asm-rightserial').value.trim().toUpperCase();
-
-            const chkBoxes = document.querySelectorAll('.asm-chk');
-            let allChecked = true;
-            chkBoxes.forEach(chk => { if (!chk.checked) allChecked = false; });
-
-            if (!allChecked) {
-                alert("ERROR: All accessory components must be checked to confirm they have been added to the kit before saving!");
-                return;
-            }
-
-            if (ext === 'UPPER') {
-                if (!leftVal || !rightVal) {
-                    alert("ERROR: Upper Extremity requires both Left Device and Right Device serial numbers!");
-                    return;
-                }
-                if (leftVal === rightVal) {
-                    alert("ERROR: Left Device and Right Device serial numbers cannot be identical!");
-                    return;
-                }
-            } else if (ext === 'LOWER') {
-                if (!leftVal) {
-                    alert("ERROR: Please enter the Device (Left) Serial Number!");
-                    return;
-                }
-            }
-
-            const confirmSubmit = confirm("Would you like to submit and complete this kit assembly?");
-            if (!confirmSubmit) return;
-
-            const btn = document.getElementById('btn-submit-kit');
-            const btnText = document.getElementById('btn-text-kit');
-            btn.disabled = true;
-            btnText.innerHTML = '<div class="spinner"></div> Saving Assembly...';
-
-            const payload = {
-                type: "kit_assembly",
-                extremity: ext,
-                kitSerial: document.getElementById('asm-kitserial').value.trim().toUpperCase(),
-                leftSerial: leftVal,
-                rightSerial: ext === 'UPPER' ? rightVal : 'N/A',
-                carabinerReg: document.getElementById('acc-reg-carabiner').checked,
-                carabinerSwiv: document.getElementById('acc-swiv-carabiner').checked,
-                phoneHolder: document.getElementById('acc-phone').checked,
-                doorAnchor: document.getElementById('acc-door').checked,
-                cables: document.getElementById('acc-cables').checked,
-                block: document.getElementById('acc-block').checked,
-                guide: document.getElementById('acc-guide').checked,
-                label: document.getElementById('acc-label').checked,
-                comments: document.getElementById('asm-comments').value.toUpperCase()
-            };
-
-            fetch(APPS_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                alert("Kit Assembly recorded successfully!");
-                document.getElementById('assembly-form').reset();
-                handleKitExtremityChange();
-                btn.disabled = false;
-                btnText.innerText = "Complete & Save Kit Assembly";
-            }).catch(() => {
-                alert("Error saving kit assembly.");
-                btn.disabled = false;
-                btnText.innerText = "Complete & Save Kit Assembly";
-            });
-        }
-    </script>
-</body>
-</html>
+  google.script.run
+    .withSuccessHandler(function(response) {
+      alert("Handle Testing Data submitted successfully!");
+      document.getElementById('handleTestingForm').reset();
+    })
+    .withFailureHandler(function(error) {
+      alert("Error submitting form: " + error.message);
+    })
+    .processHandleTestingSubmission(handleData);
+}
+</script>
