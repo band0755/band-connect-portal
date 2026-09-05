@@ -1,130 +1,255 @@
-<!-- ================================================================= -->
-<!-- HANDLE TESTING FORM SECTION                                       -->
-<!-- ================================================================= -->
-<form id="handleTestingForm" onsubmit="handleFormSubmit(event)">
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="date">Date</label>
-      <input type="date" id="date" name="date" class="form-control" required>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="time">Time</label>
-      <input type="time" id="time" name="time" class="form-control" required>
-    </div>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Bench Testing</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="serialNo">Serial No.</label>
-      <input type="text" id="serialNo" name="serialNo" class="form-control" required>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="macId">Device MAC ID</label>
-      <input type="text" id="macId" name="macId" class="form-control" required>
-    </div>
-  </div>
+    body {
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-  <div class="form-row">
-    <div class="form-group col-md-4">
-      <label for="extremity">Extremity</label>
-      <select id="extremity" name="extremity" class="form-control" required>
-        <option value="">Select Extremity...</option>
-        <option value="UPPER">UPPER</option>
-        <option value="LOWER">LOWER</option>
-      </select>
-    </div>
-    <div class="form-group col-md-4">
-      <label for="side">Side</label>
-      <select id="side" name="side" class="form-control" required>
-        <option value="">Select Side...</option>
-        <option value="LEFT">LEFT</option>
-        <option value="RIGHT">RIGHT</option>
-      </select>
-    </div>
-    <!-- NEW FIRMWARE VERSION FIELD -->
-    <div class="form-group col-md-4">
-      <label for="firmwareVersion">Firmware Version</label>
-      <input type="text" id="firmwareVersion" name="firmwareVersion" class="form-control" placeholder="e.g. V2 11.0">
-    </div>
-  </div>
+    .container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 800px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
 
-  <div class="form-row">
-    <div class="form-group col-md-3">
-      <label for="led">LED R/G/B</label>
-      <select id="led" name="led" class="form-control">
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-    <div class="form-group col-md-3">
-      <label for="buzzer">BUZZER</label>
-      <select id="buzzer" name="buzzer" class="form-control">
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-    <div class="form-group col-md-3">
-      <label for="haptic1">HAPTIC1</label>
-      <select id="haptic1" name="haptic1" class="form-control">
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-    <div class="form-group col-md-3">
-      <label for="haptic2">HAPTIC2</label>
-      <select id="haptic2" name="haptic2" class="form-control">
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-  </div>
+    h2 {
+      margin-top: 0;
+      margin-bottom: 24px;
+      color: #1a252c;
+      font-size: 24px;
+      border-bottom: 2px solid #eef2f5;
+      padding-bottom: 12px;
+    }
 
-  <div class="form-row">
-    <div class="form-group col-md-4">
-      <label for="strGauge">STR GAUGE</label>
-      <select id="strGauge" name="strGauge" class="form-control">
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-    <div class="form-group col-md-4">
-      <label for="charge">CHARGE</label>
-      <select id="charge" name="charge" class="form-control">
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-    <div class="form-group col-md-4">
-      <label for="result">RESULT</label>
-      <select id="result" name="result" class="form-control" required>
-        <option value="PASS">PASS</option>
-        <option value="FAIL">FAIL</option>
-      </select>
-    </div>
-  </div>
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
 
-  <div class="form-row">
-    <div class="form-group col-md-4">
-      <label for="calibratedStrain1">Calibrated Strain Reading</label>
-      <input type="text" id="calibratedStrain1" name="calibratedStrain1" class="form-control">
-    </div>
-    <div class="form-group col-md-4">
-      <label for="tenLb">10 LB</label>
-      <input type="text" id="tenLb" name="tenLb" class="form-control">
-    </div>
-    <div class="form-group col-md-4">
-      <label for="calibratedStrain2">Calibrated Strain Reading .1</label>
-      <input type="text" id="calibratedStrain2" name="calibratedStrain2" class="form-control">
-    </div>
-  </div>
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
 
-  <div class="form-group">
-    <label for="comments">Comments</label>
-    <textarea id="comments" name="comments" class="form-control" rows="2"></textarea>
-  </div>
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
 
-  <button type="submit" class="btn btn-primary">Submit Bench Test</button>
-</form>
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #2d3748;
+      background-color: #fff;
+      transition: all 0.2s ease-in-out;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .section-divider {
+      grid-column: 1 / -1;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2b6cb0;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .btn-submit {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #3182ce;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #2b6cb0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Device Bench Testing</h2>
+  
+  <form id="handleTestingForm" onsubmit="handleFormSubmit(event)">
+    <div class="form-grid">
+      
+      <!-- Primary Identifiers -->
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time" required>
+      </div>
+
+      <div class="form-group">
+        <label for="serialNo">Serial No.</label>
+        <input type="text" id="serialNo" name="serialNo" placeholder="e.g. ACDB160077" required>
+      </div>
+
+      <div class="form-group">
+        <label for="macId">Device MAC ID</label>
+        <input type="text" id="macId" name="macId" placeholder="e.g. 00:80:E1:26:D7:76" required>
+      </div>
+
+      <div class="form-group">
+        <label for="extremity">Extremity</label>
+        <select id="extremity" name="extremity" required>
+          <option value="">Select Extremity...</option>
+          <option value="UPPER">UPPER</option>
+          <option value="LOWER">LOWER</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="side">Side</label>
+        <select id="side" name="side" required>
+          <option value="">Select Side...</option>
+          <option value="LEFT">LEFT</option>
+          <option value="RIGHT">RIGHT</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="firmwareVersion">Firmware Version</label>
+        <input type="text" id="firmwareVersion" name="firmwareVersion" placeholder="e.g. V2 11.0">
+      </div>
+
+      <!-- Test Diagnostic Checklists -->
+      <div class="section-divider">Functional Bench Diagnostics</div>
+
+      <div class="form-group">
+        <label for="led">LED R/G/B</label>
+        <select id="led" name="led">
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="buzzer">BUZZER</label>
+        <select id="buzzer" name="buzzer">
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="haptic1">HAPTIC1</label>
+        <select id="haptic1" name="haptic1">
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="haptic2">HAPTIC2</label>
+        <select id="haptic2" name="haptic2">
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="strGauge">STR GAUGE</label>
+        <select id="strGauge" name="strGauge">
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="charge">CHARGE</label>
+        <select id="charge" name="charge">
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="result">RESULT</label>
+        <select id="result" name="result" required>
+          <option value="PASS">PASS</option>
+          <option value="FAIL">FAIL</option>
+        </select>
+      </div>
+
+      <!-- Strain Gauge Readings -->
+      <div class="section-divider">Strain Calibration Readings</div>
+
+      <div class="form-group">
+        <label for="calibratedStrain1">Calibrated Strain Reading</label>
+        <input type="text" id="calibratedStrain1" name="calibratedStrain1">
+      </div>
+
+      <div class="form-group">
+        <label for="tenLb">10 LB</label>
+        <input type="text" id="tenLb" name="tenLb">
+      </div>
+
+      <div class="form-group">
+        <label for="calibratedStrain2">Calibrated Strain Reading .1</label>
+        <input type="text" id="calibratedStrain2" name="calibratedStrain2">
+      </div>
+
+      <div class="form-group full-width">
+        <label for="comments">Comments</label>
+        <textarea id="comments" name="comments" placeholder="Additional observations..."></textarea>
+      </div>
+
+    </div>
+
+    <button type="submit" class="btn-submit">Submit Bench Test</button>
+  </form>
+</div>
 
 <script>
 function handleFormSubmit(event) {
@@ -137,6 +262,7 @@ function handleFormSubmit(event) {
     macId: document.getElementById('macId').value,
     extremity: document.getElementById('extremity').value,
     side: document.getElementById('side').value,
+    firmwareVersion: document.getElementById('firmwareVersion').value,
     led: document.getElementById('led').value,
     buzzer: document.getElementById('buzzer').value,
     haptic1: document.getElementById('haptic1').value,
@@ -144,21 +270,38 @@ function handleFormSubmit(event) {
     strGauge: document.getElementById('strGauge').value,
     charge: document.getElementById('charge').value,
     result: document.getElementById('result').value,
-    comments: document.getElementById('comments').value,
     calibratedStrain1: document.getElementById('calibratedStrain1').value,
     tenLb: document.getElementById('tenLb').value,
     calibratedStrain2: document.getElementById('calibratedStrain2').value,
-    firmwareVersion: document.getElementById('firmwareVersion').value // Payload inclusion
+    comments: document.getElementById('comments').value
   };
 
-  google.script.run
-    .withSuccessHandler(function(response) {
-      alert("Handle Testing Data submitted successfully!");
+  // Check if running within Google Apps Script iframe environment or Web App endpoint
+  if (typeof google !== 'undefined' && google.script && google.script.run) {
+    google.script.run
+      .withSuccessHandler(function(response) {
+        alert("Bench Test submitted successfully!");
+        document.getElementById('handleTestingForm').reset();
+      })
+      .withFailureHandler(function(error) {
+        alert("Error submitting form: " + error.message);
+      })
+      .processHandleTestingSubmission(handleData);
+  } else {
+    // Standard HTTP POST request when hosted on GitHub Pages
+    fetch('YOUR_WEB_APP_URL_HERE', {
+      method: 'POST',
+      body: JSON.stringify(handleData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert("Bench Test submitted successfully!");
       document.getElementById('handleTestingForm').reset();
     })
-    .withFailureHandler(function(error) {
-      alert("Error submitting form: " + error.message);
-    })
-    .processHandleTestingSubmission(handleData);
+    .catch(err => alert("Submission error: " + err));
+  }
 }
 </script>
+
+</body>
+</html>
