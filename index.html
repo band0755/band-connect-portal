@@ -11,7 +11,7 @@
     }
 
     body {
-      background-color: #0f172a; /* Dark background */
+      background-color: #0f172a;
       color: #f8fafc;
       margin: 0;
       padding: 30px 15px;
@@ -22,13 +22,36 @@
     }
 
     .container {
-      background: #1e293b; /* Dark card container */
+      background: #1e293b;
       width: 100%;
       max-width: 850px;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
       border: 1px solid #334155;
+    }
+
+    /* Password Modal / Overlay */
+    #passwordGate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    #passwordGate input {
+      margin: 15px 0;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    /* Portal Main Content */
+    #portalContent {
+      display: none; /* Hidden until correct password is submitted */
     }
 
     /* Tab Navigation */
@@ -60,7 +83,6 @@
       border-bottom-color: #38bdf8;
     }
 
-    /* Tab Content Display */
     .tab-content {
       display: none;
     }
@@ -76,7 +98,6 @@
       font-size: 22px;
     }
 
-    /* Form Layout */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -172,227 +193,266 @@
     .btn-submit:hover {
       background-color: #0369a1;
     }
+
+    .error-msg {
+      color: #f87171;
+      font-size: 14px;
+      margin-top: 8px;
+      display: none;
+    }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- TAB NAVIGATION -->
-  <div class="tab-navigation">
-    <button class="tab-btn active" onclick="switchTab('handleTesting', event)">Device Bench Testing</button>
-    <button class="tab-btn" onclick="switchTab('kitAssembly', event)">Kit Assembly</button>
-    <button class="tab-btn" onclick="switchTab('failedTesting', event)">Failed Testing</button>
+  <!-- PASSWORD GATE OVERLAY -->
+  <div id="passwordGate">
+    <h2>Band Connect Portal Authentication</h2>
+    <p style="color: #94a3b8; font-size: 14px;">Enter authorization password to access testing and assembly logs.</p>
+    <input type="password" id="portalPassword" placeholder="Enter Portal Password" autofocus>
+    <button type="button" class="btn-submit" style="max-width: 320px;" onclick="checkPassword()">Access Portal</button>
+    <div id="authError" class="error-msg">Incorrect Password. Please try again.</div>
   </div>
 
-  <!-- TAB 1: DEVICE BENCH TESTING -->
-  <div id="handleTesting" class="tab-content active">
-    <h2>Device Bench Testing</h2>
-    <form id="handleTestingForm" onsubmit="submitHandleTesting(event)">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="ht_date">Date</label>
-          <input type="date" id="ht_date" required>
-        </div>
-        <div class="form-group">
-          <label for="ht_time">Time</label>
-          <input type="time" id="ht_time" required>
-        </div>
-        <div class="form-group">
-          <label for="ht_serialNo">Serial No.</label>
-          <input type="text" id="ht_serialNo" placeholder="e.g. ACDB160077" required>
-        </div>
-        <div class="form-group">
-          <label for="ht_macId">Device MAC ID</label>
-          <input type="text" id="ht_macId" placeholder="e.g. 00:80:E1:26:D7:76" required>
-        </div>
-        <div class="form-group">
-          <label for="ht_extremity">Extremity</label>
-          <select id="ht_extremity" required>
-            <option value="">Select Extremity...</option>
-            <option value="UPPER">UPPER</option>
-            <option value="LOWER">LOWER</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="ht_side">Side</label>
-          <select id="ht_side" required>
-            <option value="">Select Side...</option>
-            <option value="LEFT">LEFT</option>
-            <option value="RIGHT">RIGHT</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="ht_firmwareVersion">Firmware Version</label>
-          <input type="text" id="ht_firmwareVersion" placeholder="e.g. V2 11.0">
-        </div>
+  <!-- MAIN PORTAL CONTENT (UNLOCKED UPON AUTH) -->
+  <div id="portalContent">
+    <!-- TAB NAVIGATION -->
+    <div class="tab-navigation">
+      <button class="tab-btn active" onclick="switchTab('handleTesting', event)">Device Bench Testing</button>
+      <button class="tab-btn" onclick="switchTab('kitAssembly', event)">Kit Assembly</button>
+      <button class="tab-btn" onclick="switchTab('failedTesting', event)">Failed Testing</button>
+    </div>
 
-        <div class="section-divider">Functional Bench Diagnostics</div>
-        <div class="form-group">
-          <label for="ht_led">LED R/G/B</label>
-          <select id="ht_led"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
-        <div class="form-group">
-          <label for="ht_buzzer">BUZZER</label>
-          <select id="ht_buzzer"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
-        <div class="form-group">
-          <label for="ht_haptic1">HAPTIC1</label>
-          <select id="ht_haptic1"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
-        <div class="form-group">
-          <label for="ht_haptic2">HAPTIC2</label>
-          <select id="ht_haptic2"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
-        <div class="form-group">
-          <label for="ht_strGauge">STR GAUGE</label>
-          <select id="ht_strGauge"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
-        <div class="form-group">
-          <label for="ht_charge">CHARGE</label>
-          <select id="ht_charge"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
-        <div class="form-group">
-          <label for="ht_result">RESULT</label>
-          <select id="ht_result" required><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
-        </div>
+    <!-- TAB 1: DEVICE BENCH TESTING -->
+    <div id="handleTesting" class="tab-content active">
+      <h2>Device Bench Testing</h2>
+      <form id="handleTestingForm" onsubmit="submitHandleTesting(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ht_date">Date</label>
+            <input type="date" id="ht_date" required>
+          </div>
+          <div class="form-group">
+            <label for="ht_time">Time</label>
+            <input type="time" id="ht_time" required>
+          </div>
+          <div class="form-group">
+            <label for="ht_serialNo">Serial No.</label>
+            <input type="text" id="ht_serialNo" placeholder="e.g. ACDB160077" required>
+          </div>
+          <div class="form-group">
+            <label for="ht_macId">Device MAC ID</label>
+            <input type="text" id="ht_macId" placeholder="e.g. 00:80:E1:26:D7:76" required>
+          </div>
+          <div class="form-group">
+            <label for="ht_extremity">Extremity</label>
+            <select id="ht_extremity" required>
+              <option value="">Select Extremity...</option>
+              <option value="UPPER">UPPER</option>
+              <option value="LOWER">LOWER</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ht_side">Side</label>
+            <select id="ht_side" required>
+              <option value="">Select Side...</option>
+              <option value="LEFT">LEFT</option>
+              <option value="RIGHT">RIGHT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ht_firmwareVersion">Firmware Version</label>
+            <input type="text" id="ht_firmwareVersion" placeholder="e.g. V2 11.0">
+          </div>
 
-        <div class="section-divider">Strain Calibration Readings</div>
-        <div class="form-group">
-          <label for="ht_calibrated1">Calibrated Strain Reading</label>
-          <input type="text" id="ht_calibrated1">
-        </div>
-        <div class="form-group">
-          <label for="ht_tenLb">10 LB</label>
-          <input type="text" id="ht_tenLb">
-        </div>
-        <div class="form-group">
-          <label for="ht_calibrated2">Calibrated Strain Reading .1</label>
-          <input type="text" id="ht_calibrated2">
-        </div>
-        <div class="form-group full-width">
-          <label for="ht_comments">Comments</label>
-          <textarea id="ht_comments" placeholder="Additional observations..."></textarea>
-        </div>
-      </div>
-      <button type="submit" class="btn-submit">Submit Bench Test</button>
-    </form>
-  </div>
+          <div class="section-divider">Functional Bench Diagnostics</div>
+          <div class="form-group">
+            <label for="ht_led">LED R/G/B</label>
+            <select id="ht_led"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ht_buzzer">BUZZER</label>
+            <select id="ht_buzzer"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ht_haptic1">HAPTIC1</label>
+            <select id="ht_haptic1"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ht_haptic2">HAPTIC2</label>
+            <select id="ht_haptic2"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ht_strGauge">STR GAUGE</label>
+            <select id="ht_strGauge"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ht_charge">CHARGE</label>
+            <select id="ht_charge"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
+          <div class="form-group">
+            <label for="ht_result">RESULT</label>
+            <select id="ht_result" required><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+          </div>
 
-  <!-- TAB 2: KIT ASSEMBLY -->
-  <div id="kitAssembly" class="tab-content">
-    <h2>Kit Assembly</h2>
-    <form id="kitAssemblyForm" onsubmit="submitKitAssembly(event)">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="ka_date">Date Assembled</label>
-          <input type="date" id="ka_date" required>
-        </div>
-        <div class="form-group">
-          <label for="ka_extremity">Extremity</label>
-          <select id="ka_extremity" required>
-            <option value="">Select Extremity...</option>
-            <option value="UPPER">UPPER</option>
-            <option value="LOWER">LOWER</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="ka_kitSerial">Kit Serial #</label>
-          <input type="text" id="ka_kitSerial" placeholder="e.g. KAE001B41" required>
-        </div>
-        <div class="form-group">
-          <label for="ka_leftSerial">Left Handle Serial #</label>
-          <input type="text" id="ka_leftSerial" placeholder="e.g. ACDB160077" required>
-        </div>
-        <div class="form-group">
-          <label for="ka_rightSerial">Right Handle Serial #</label>
-          <input type="text" id="ka_rightSerial" placeholder="N/A for LOWER">
-        </div>
-
-        <div class="section-divider">Kit Checklist Items</div>
-        <div class="form-group full-width">
-          <div class="checkbox-group">
-            <label class="checkbox-item"><input type="checkbox" id="ka_c1" checked> 2 Regular Carabiners</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c2" checked> 2 Swivel Carabiners</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c3" checked> Phone Holder</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c4" checked> Door Anchor</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c5" checked> 2 Charging Cables</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c6" checked> Charging Block</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c7" checked> Quick Start Guide</label>
-            <label class="checkbox-item"><input type="checkbox" id="ka_c8" checked> Kit Label with Serial</label>
+          <div class="section-divider">Strain Calibration Readings</div>
+          <div class="form-group">
+            <label for="ht_calibrated1">Calibrated Strain Reading</label>
+            <input type="text" id="ht_calibrated1">
+          </div>
+          <div class="form-group">
+            <label for="ht_tenLb">10 LB</label>
+            <input type="text" id="ht_tenLb">
+          </div>
+          <div class="form-group">
+            <label for="ht_calibrated2">Calibrated Strain Reading .1</label>
+            <input type="text" id="ht_calibrated2">
+          </div>
+          <div class="form-group full-width">
+            <label for="ht_comments">Comments</label>
+            <textarea id="ht_comments" placeholder="Additional observations..."></textarea>
           </div>
         </div>
+        <button type="submit" class="btn-submit">Submit Bench Test</button>
+      </form>
+    </div>
 
-        <div class="form-group full-width">
-          <label for="ka_comments">Comments</label>
-          <textarea id="ka_comments" placeholder="Assembly notes..."></textarea>
-        </div>
-      </div>
-      <button type="submit" class="btn-submit">Submit Kit Assembly</button>
-    </form>
-  </div>
+    <!-- TAB 2: KIT ASSEMBLY -->
+    <div id="kitAssembly" class="tab-content">
+      <h2>Kit Assembly</h2>
+      <form id="kitAssemblyForm" onsubmit="submitKitAssembly(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ka_date">Date Assembled</label>
+            <input type="date" id="ka_date" required>
+          </div>
+          <div class="form-group">
+            <label for="ka_extremity">Extremity</label>
+            <select id="ka_extremity" required>
+              <option value="">Select Extremity...</option>
+              <option value="UPPER">UPPER</option>
+              <option value="LOWER">LOWER</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ka_kitSerial">Kit Serial #</label>
+            <input type="text" id="ka_kitSerial" placeholder="e.g. KAE001B41" required>
+          </div>
+          <div class="form-group">
+            <label for="ka_leftSerial">Left Handle Serial #</label>
+            <input type="text" id="ka_leftSerial" placeholder="e.g. ACDB160077" required>
+          </div>
+          <div class="form-group">
+            <label for="ka_rightSerial">Right Handle Serial #</label>
+            <input type="text" id="ka_rightSerial" placeholder="N/A for LOWER">
+          </div>
 
-  <!-- TAB 3: FAILED TESTING -->
-  <div id="failedTesting" class="tab-content">
-    <h2>Failed Testing Log</h2>
-    <form id="failedTestingForm" onsubmit="submitFailedTesting(event)">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="ft_date">Date</label>
-          <input type="date" id="ft_date" required>
-        </div>
-        <div class="form-group">
-          <label for="ft_time">Time</label>
-          <input type="time" id="ft_time" required>
-        </div>
-        <div class="form-group">
-          <label for="ft_serialNo">Serial No.</label>
-          <input type="text" id="ft_serialNo" required>
-        </div>
-        <div class="form-group">
-          <label for="ft_macId">MAC ID</label>
-          <input type="text" id="ft_macId" required>
-        </div>
-        <div class="form-group">
-          <label for="ft_extremity">Extremity</label>
-          <select id="ft_extremity" required>
-            <option value="">Select...</option>
-            <option value="UPPER">UPPER</option>
-            <option value="LOWER">LOWER</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="ft_side">Side</label>
-          <select id="ft_side" required>
-            <option value="">Select...</option>
-            <option value="LEFT">LEFT</option>
-            <option value="RIGHT">RIGHT</option>
-          </select>
-        </div>
+          <div class="section-divider">Kit Checklist Items</div>
+          <div class="form-group full-width">
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" id="ka_c1" checked> 2 Regular Carabiners</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c2" checked> 2 Swivel Carabiners</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c3" checked> Phone Holder</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c4" checked> Door Anchor</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c5" checked> 2 Charging Cables</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c6" checked> Charging Block</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c7" checked> Quick Start Guide</label>
+              <label class="checkbox-item"><input type="checkbox" id="ka_c8" checked> Kit Label with Serial</label>
+            </div>
+          </div>
 
-        <div class="section-divider">Failure Checklist</div>
-        <div class="form-group"><label for="ft_led">LED</label><select id="ft_led"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
-        <div class="form-group"><label for="ft_buzzer">Buzzer</label><select id="ft_buzzer"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
-        <div class="form-group"><label for="ft_haptic1">Haptic 1</label><select id="ft_haptic1"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
-        <div class="form-group"><label for="ft_haptic2">Haptic 2</label><select id="ft_haptic2"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
-        <div class="form-group"><label for="ft_strainCircuit">Strain Circuit</label><select id="ft_strainCircuit"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
-        <div class="form-group"><label for="ft_chargeCircuit">Charge Circuit</label><select id="ft_chargeCircuit"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
-        <div class="form-group"><label for="ft_overallResult">Overall Result</label><select id="ft_overallResult" required><option value="FAIL">FAIL</option><option value="PASS">PASS</option></select></div>
+          <div class="form-group full-width">
+            <label for="ka_comments">Comments</label>
+            <textarea id="ka_comments" placeholder="Assembly notes..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">Submit Kit Assembly</button>
+      </form>
+    </div>
 
-        <div class="form-group full-width">
-          <label for="ft_strainReading">Strain Reading</label>
-          <input type="text" id="ft_strainReading">
+    <!-- TAB 3: FAILED TESTING -->
+    <div id="failedTesting" class="tab-content">
+      <h2>Failed Testing Log</h2>
+      <form id="failedTestingForm" onsubmit="submitFailedTesting(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ft_date">Date</label>
+            <input type="date" id="ft_date" required>
+          </div>
+          <div class="form-group">
+            <label for="ft_time">Time</label>
+            <input type="time" id="ft_time" required>
+          </div>
+          <div class="form-group">
+            <label for="ft_serialNo">Serial No.</label>
+            <input type="text" id="ft_serialNo" required>
+          </div>
+          <div class="form-group">
+            <label for="ft_macId">MAC ID</label>
+            <input type="text" id="ft_macId" required>
+          </div>
+          <div class="form-group">
+            <label for="ft_extremity">Extremity</label>
+            <select id="ft_extremity" required>
+              <option value="">Select...</option>
+              <option value="UPPER">UPPER</option>
+              <option value="LOWER">LOWER</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ft_side">Side</label>
+            <select id="ft_side" required>
+              <option value="">Select...</option>
+              <option value="LEFT">LEFT</option>
+              <option value="RIGHT">RIGHT</option>
+            </select>
+          </div>
+
+          <div class="section-divider">Failure Checklist</div>
+          <div class="form-group"><label for="ft_led">LED</label><select id="ft_led"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+          <div class="form-group"><label for="ft_buzzer">Buzzer</label><select id="ft_buzzer"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+          <div class="form-group"><label for="ft_haptic1">Haptic 1</label><select id="ft_haptic1"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+          <div class="form-group"><label for="ft_haptic2">Haptic 2</label><select id="ft_haptic2"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+          <div class="form-group"><label for="ft_strainCircuit">Strain Circuit</label><select id="ft_strainCircuit"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+          <div class="form-group"><label for="ft_chargeCircuit">Charge Circuit</label><select id="ft_chargeCircuit"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+          <div class="form-group"><label for="ft_overallResult">Overall Result</label><select id="ft_overallResult" required><option value="FAIL">FAIL</option><option value="PASS">PASS</option></select></div>
+
+          <div class="form-group full-width">
+            <label for="ft_strainReading">Strain Reading</label>
+            <input type="text" id="ft_strainReading">
+          </div>
+          <div class="form-group full-width">
+            <label for="ft_comments">Failure Notes / Comments</label>
+            <textarea id="ft_comments" placeholder="Describe failure..."></textarea>
+          </div>
         </div>
-        <div class="form-group full-width">
-          <label for="ft_comments">Failure Notes / Comments</label>
-          <textarea id="ft_comments" placeholder="Describe failure..."></textarea>
-        </div>
-      </div>
-      <button type="submit" class="btn-submit">Submit Failure Log</button>
-    </form>
+        <button type="submit" class="btn-submit">Submit Failure Log</button>
+      </form>
+    </div>
   </div>
 </div>
 
 <script>
+  // Set your portal password here
+  const PORTAL_PASSWORD = "bandconnect2026";
+
+  // Password Verification Logic
+  function checkPassword() {
+    const entered = document.getElementById('portalPassword').value;
+    if (entered === PORTAL_PASSWORD) {
+      document.getElementById('passwordGate').style.display = 'none';
+      document.getElementById('portalContent').style.display = 'block';
+    } else {
+      document.getElementById('authError').style.display = 'block';
+    }
+  }
+
+  // Support pressing 'Enter' key on password input
+  document.getElementById('portalPassword').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  // Tab Switcher
   function switchTab(tabId, evt) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
