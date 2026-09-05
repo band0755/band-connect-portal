@@ -154,6 +154,11 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label>Firmware Version</label>
+                        <input type="text" id="test-firmware" placeholder="e.g., V2 11.0 or v8">
+                    </div>
+
                     <label style="margin-bottom: 8px;">Functional Component Checks</label>
                     <div class="checkbox-grid">
                         <label class="checkbox-label"><input type="checkbox" id="chk-led" class="chk-comp"> LED R/G/B Pass</label>
@@ -365,6 +370,7 @@
                 side: document.getElementById('test-side').value,
                 serial: document.getElementById('test-serial').value.toUpperCase(),
                 mac: document.getElementById('test-mac').value.toUpperCase(),
+                firmwareVersion: document.getElementById('test-firmware').value.trim().toUpperCase(),
                 led: document.getElementById('chk-led').checked ? "P" : "F",
                 buzzer: document.getElementById('chk-buzzer').checked ? "P" : "F",
                 haptic1: document.getElementById('chk-haptic1').checked ? "P" : "F",
