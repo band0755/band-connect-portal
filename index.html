@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Device Bench Testing</title>
+  <title>Band Connect Portal</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,32 +11,72 @@
     }
 
     body {
-      background-color: #f4f6f9;
+      background-color: #0f172a; /* Dark background */
+      color: #f8fafc;
       margin: 0;
-      padding: 40px 20px;
+      padding: 30px 15px;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
+      min-height: 100vh;
     }
 
     .container {
-      background: #ffffff;
+      background: #1e293b; /* Dark card container */
       width: 100%;
-      max-width: 800px;
+      max-width: 850px;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      border: 1px solid #334155;
+    }
+
+    /* Tab Navigation */
+    .tab-navigation {
+      display: flex;
+      border-bottom: 2px solid #334155;
+      margin-bottom: 25px;
+      gap: 10px;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      border: none;
+      background: none;
+      font-size: 15px;
+      font-weight: 600;
+      color: #94a3b8;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: #38bdf8;
+    }
+
+    .tab-btn.active {
+      color: #38bdf8;
+      border-bottom-color: #38bdf8;
+    }
+
+    /* Tab Content Display */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     h2 {
       margin-top: 0;
-      margin-bottom: 24px;
-      color: #1a252c;
-      font-size: 24px;
-      border-bottom: 2px solid #eef2f5;
-      padding-bottom: 12px;
+      margin-bottom: 20px;
+      color: #f8fafc;
+      font-size: 22px;
     }
 
+    /* Form Layout */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -53,9 +93,9 @@
     }
 
     label {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      color: #4a5568;
+      color: #cbd5e1;
       margin-bottom: 6px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -63,39 +103,62 @@
 
     input, select, textarea {
       padding: 10px 12px;
-      border: 1px solid #cbd5e0;
+      border: 1px solid #475569;
       border-radius: 6px;
       font-size: 14px;
-      color: #2d3748;
-      background-color: #fff;
+      color: #f8fafc;
+      background-color: #0f172a;
       transition: all 0.2s ease-in-out;
     }
 
     input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: #3182ce;
-      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
     }
 
     textarea {
       resize: vertical;
-      min-height: 80px;
+      min-height: 70px;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      padding: 10px 0;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #e2e8f0;
+    }
+
+    .checkbox-item input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #38bdf8;
     }
 
     .section-divider {
       grid-column: 1 / -1;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
-      color: #2b6cb0;
+      color: #38bdf8;
       margin-top: 10px;
       padding-top: 10px;
-      border-top: 1px dashed #e2e8f0;
+      border-top: 1px dashed #334155;
+      text-transform: uppercase;
     }
 
     .btn-submit {
-      margin-top: 20px;
+      margin-top: 24px;
       padding: 12px 24px;
-      background-color: #3182ce;
+      background-color: #0284c7;
       color: #ffffff;
       border: none;
       border-radius: 6px;
@@ -107,200 +170,323 @@
     }
 
     .btn-submit:hover {
-      background-color: #2b6cb0;
+      background-color: #0369a1;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Device Bench Testing</h2>
-  
-  <form id="handleTestingForm" onsubmit="handleFormSubmit(event)">
-    <div class="form-grid">
-      
-      <!-- Primary Identifiers -->
-      <div class="form-group">
-        <label for="date">Date</label>
-        <input type="date" id="date" name="date" required>
+  <!-- TAB NAVIGATION -->
+  <div class="tab-navigation">
+    <button class="tab-btn active" onclick="switchTab('handleTesting', event)">Device Bench Testing</button>
+    <button class="tab-btn" onclick="switchTab('kitAssembly', event)">Kit Assembly</button>
+    <button class="tab-btn" onclick="switchTab('failedTesting', event)">Failed Testing</button>
+  </div>
+
+  <!-- TAB 1: DEVICE BENCH TESTING -->
+  <div id="handleTesting" class="tab-content active">
+    <h2>Device Bench Testing</h2>
+    <form id="handleTestingForm" onsubmit="submitHandleTesting(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="ht_date">Date</label>
+          <input type="date" id="ht_date" required>
+        </div>
+        <div class="form-group">
+          <label for="ht_time">Time</label>
+          <input type="time" id="ht_time" required>
+        </div>
+        <div class="form-group">
+          <label for="ht_serialNo">Serial No.</label>
+          <input type="text" id="ht_serialNo" placeholder="e.g. ACDB160077" required>
+        </div>
+        <div class="form-group">
+          <label for="ht_macId">Device MAC ID</label>
+          <input type="text" id="ht_macId" placeholder="e.g. 00:80:E1:26:D7:76" required>
+        </div>
+        <div class="form-group">
+          <label for="ht_extremity">Extremity</label>
+          <select id="ht_extremity" required>
+            <option value="">Select Extremity...</option>
+            <option value="UPPER">UPPER</option>
+            <option value="LOWER">LOWER</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ht_side">Side</label>
+          <select id="ht_side" required>
+            <option value="">Select Side...</option>
+            <option value="LEFT">LEFT</option>
+            <option value="RIGHT">RIGHT</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ht_firmwareVersion">Firmware Version</label>
+          <input type="text" id="ht_firmwareVersion" placeholder="e.g. V2 11.0">
+        </div>
+
+        <div class="section-divider">Functional Bench Diagnostics</div>
+        <div class="form-group">
+          <label for="ht_led">LED R/G/B</label>
+          <select id="ht_led"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+        <div class="form-group">
+          <label for="ht_buzzer">BUZZER</label>
+          <select id="ht_buzzer"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+        <div class="form-group">
+          <label for="ht_haptic1">HAPTIC1</label>
+          <select id="ht_haptic1"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+        <div class="form-group">
+          <label for="ht_haptic2">HAPTIC2</label>
+          <select id="ht_haptic2"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+        <div class="form-group">
+          <label for="ht_strGauge">STR GAUGE</label>
+          <select id="ht_strGauge"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+        <div class="form-group">
+          <label for="ht_charge">CHARGE</label>
+          <select id="ht_charge"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+        <div class="form-group">
+          <label for="ht_result">RESULT</label>
+          <select id="ht_result" required><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select>
+        </div>
+
+        <div class="section-divider">Strain Calibration Readings</div>
+        <div class="form-group">
+          <label for="ht_calibrated1">Calibrated Strain Reading</label>
+          <input type="text" id="ht_calibrated1">
+        </div>
+        <div class="form-group">
+          <label for="ht_tenLb">10 LB</label>
+          <input type="text" id="ht_tenLb">
+        </div>
+        <div class="form-group">
+          <label for="ht_calibrated2">Calibrated Strain Reading .1</label>
+          <input type="text" id="ht_calibrated2">
+        </div>
+        <div class="form-group full-width">
+          <label for="ht_comments">Comments</label>
+          <textarea id="ht_comments" placeholder="Additional observations..."></textarea>
+        </div>
       </div>
+      <button type="submit" class="btn-submit">Submit Bench Test</button>
+    </form>
+  </div>
 
-      <div class="form-group">
-        <label for="time">Time</label>
-        <input type="time" id="time" name="time" required>
+  <!-- TAB 2: KIT ASSEMBLY -->
+  <div id="kitAssembly" class="tab-content">
+    <h2>Kit Assembly</h2>
+    <form id="kitAssemblyForm" onsubmit="submitKitAssembly(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="ka_date">Date Assembled</label>
+          <input type="date" id="ka_date" required>
+        </div>
+        <div class="form-group">
+          <label for="ka_extremity">Extremity</label>
+          <select id="ka_extremity" required>
+            <option value="">Select Extremity...</option>
+            <option value="UPPER">UPPER</option>
+            <option value="LOWER">LOWER</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ka_kitSerial">Kit Serial #</label>
+          <input type="text" id="ka_kitSerial" placeholder="e.g. KAE001B41" required>
+        </div>
+        <div class="form-group">
+          <label for="ka_leftSerial">Left Handle Serial #</label>
+          <input type="text" id="ka_leftSerial" placeholder="e.g. ACDB160077" required>
+        </div>
+        <div class="form-group">
+          <label for="ka_rightSerial">Right Handle Serial #</label>
+          <input type="text" id="ka_rightSerial" placeholder="N/A for LOWER">
+        </div>
+
+        <div class="section-divider">Kit Checklist Items</div>
+        <div class="form-group full-width">
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" id="ka_c1" checked> 2 Regular Carabiners</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c2" checked> 2 Swivel Carabiners</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c3" checked> Phone Holder</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c4" checked> Door Anchor</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c5" checked> 2 Charging Cables</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c6" checked> Charging Block</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c7" checked> Quick Start Guide</label>
+            <label class="checkbox-item"><input type="checkbox" id="ka_c8" checked> Kit Label with Serial</label>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="ka_comments">Comments</label>
+          <textarea id="ka_comments" placeholder="Assembly notes..."></textarea>
+        </div>
       </div>
+      <button type="submit" class="btn-submit">Submit Kit Assembly</button>
+    </form>
+  </div>
 
-      <div class="form-group">
-        <label for="serialNo">Serial No.</label>
-        <input type="text" id="serialNo" name="serialNo" placeholder="e.g. ACDB160077" required>
+  <!-- TAB 3: FAILED TESTING -->
+  <div id="failedTesting" class="tab-content">
+    <h2>Failed Testing Log</h2>
+    <form id="failedTestingForm" onsubmit="submitFailedTesting(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="ft_date">Date</label>
+          <input type="date" id="ft_date" required>
+        </div>
+        <div class="form-group">
+          <label for="ft_time">Time</label>
+          <input type="time" id="ft_time" required>
+        </div>
+        <div class="form-group">
+          <label for="ft_serialNo">Serial No.</label>
+          <input type="text" id="ft_serialNo" required>
+        </div>
+        <div class="form-group">
+          <label for="ft_macId">MAC ID</label>
+          <input type="text" id="ft_macId" required>
+        </div>
+        <div class="form-group">
+          <label for="ft_extremity">Extremity</label>
+          <select id="ft_extremity" required>
+            <option value="">Select...</option>
+            <option value="UPPER">UPPER</option>
+            <option value="LOWER">LOWER</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ft_side">Side</label>
+          <select id="ft_side" required>
+            <option value="">Select...</option>
+            <option value="LEFT">LEFT</option>
+            <option value="RIGHT">RIGHT</option>
+          </select>
+        </div>
+
+        <div class="section-divider">Failure Checklist</div>
+        <div class="form-group"><label for="ft_led">LED</label><select id="ft_led"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+        <div class="form-group"><label for="ft_buzzer">Buzzer</label><select id="ft_buzzer"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+        <div class="form-group"><label for="ft_haptic1">Haptic 1</label><select id="ft_haptic1"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+        <div class="form-group"><label for="ft_haptic2">Haptic 2</label><select id="ft_haptic2"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+        <div class="form-group"><label for="ft_strainCircuit">Strain Circuit</label><select id="ft_strainCircuit"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+        <div class="form-group"><label for="ft_chargeCircuit">Charge Circuit</label><select id="ft_chargeCircuit"><option value="PASS">PASS</option><option value="FAIL">FAIL</option></select></div>
+        <div class="form-group"><label for="ft_overallResult">Overall Result</label><select id="ft_overallResult" required><option value="FAIL">FAIL</option><option value="PASS">PASS</option></select></div>
+
+        <div class="form-group full-width">
+          <label for="ft_strainReading">Strain Reading</label>
+          <input type="text" id="ft_strainReading">
+        </div>
+        <div class="form-group full-width">
+          <label for="ft_comments">Failure Notes / Comments</label>
+          <textarea id="ft_comments" placeholder="Describe failure..."></textarea>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="macId">Device MAC ID</label>
-        <input type="text" id="macId" name="macId" placeholder="e.g. 00:80:E1:26:D7:76" required>
-      </div>
-
-      <div class="form-group">
-        <label for="extremity">Extremity</label>
-        <select id="extremity" name="extremity" required>
-          <option value="">Select Extremity...</option>
-          <option value="UPPER">UPPER</option>
-          <option value="LOWER">LOWER</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="side">Side</label>
-        <select id="side" name="side" required>
-          <option value="">Select Side...</option>
-          <option value="LEFT">LEFT</option>
-          <option value="RIGHT">RIGHT</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="firmwareVersion">Firmware Version</label>
-        <input type="text" id="firmwareVersion" name="firmwareVersion" placeholder="e.g. V2 11.0">
-      </div>
-
-      <!-- Test Diagnostic Checklists -->
-      <div class="section-divider">Functional Bench Diagnostics</div>
-
-      <div class="form-group">
-        <label for="led">LED R/G/B</label>
-        <select id="led" name="led">
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="buzzer">BUZZER</label>
-        <select id="buzzer" name="buzzer">
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="haptic1">HAPTIC1</label>
-        <select id="haptic1" name="haptic1">
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="haptic2">HAPTIC2</label>
-        <select id="haptic2" name="haptic2">
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="strGauge">STR GAUGE</label>
-        <select id="strGauge" name="strGauge">
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="charge">CHARGE</label>
-        <select id="charge" name="charge">
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="result">RESULT</label>
-        <select id="result" name="result" required>
-          <option value="PASS">PASS</option>
-          <option value="FAIL">FAIL</option>
-        </select>
-      </div>
-
-      <!-- Strain Gauge Readings -->
-      <div class="section-divider">Strain Calibration Readings</div>
-
-      <div class="form-group">
-        <label for="calibratedStrain1">Calibrated Strain Reading</label>
-        <input type="text" id="calibratedStrain1" name="calibratedStrain1">
-      </div>
-
-      <div class="form-group">
-        <label for="tenLb">10 LB</label>
-        <input type="text" id="tenLb" name="tenLb">
-      </div>
-
-      <div class="form-group">
-        <label for="calibratedStrain2">Calibrated Strain Reading .1</label>
-        <input type="text" id="calibratedStrain2" name="calibratedStrain2">
-      </div>
-
-      <div class="form-group full-width">
-        <label for="comments">Comments</label>
-        <textarea id="comments" name="comments" placeholder="Additional observations..."></textarea>
-      </div>
-
-    </div>
-
-    <button type="submit" class="btn-submit">Submit Bench Test</button>
-  </form>
+      <button type="submit" class="btn-submit">Submit Failure Log</button>
+    </form>
+  </div>
 </div>
 
 <script>
-function handleFormSubmit(event) {
-  event.preventDefault();
-  
-  const handleData = {
-    date: document.getElementById('date').value,
-    time: document.getElementById('time').value,
-    serialNo: document.getElementById('serialNo').value,
-    macId: document.getElementById('macId').value,
-    extremity: document.getElementById('extremity').value,
-    side: document.getElementById('side').value,
-    firmwareVersion: document.getElementById('firmwareVersion').value,
-    led: document.getElementById('led').value,
-    buzzer: document.getElementById('buzzer').value,
-    haptic1: document.getElementById('haptic1').value,
-    haptic2: document.getElementById('haptic2').value,
-    strGauge: document.getElementById('strGauge').value,
-    charge: document.getElementById('charge').value,
-    result: document.getElementById('result').value,
-    calibratedStrain1: document.getElementById('calibratedStrain1').value,
-    tenLb: document.getElementById('tenLb').value,
-    calibratedStrain2: document.getElementById('calibratedStrain2').value,
-    comments: document.getElementById('comments').value
-  };
-
-  // Check if running within Google Apps Script iframe environment or Web App endpoint
-  if (typeof google !== 'undefined' && google.script && google.script.run) {
-    google.script.run
-      .withSuccessHandler(function(response) {
-        alert("Bench Test submitted successfully!");
-        document.getElementById('handleTestingForm').reset();
-      })
-      .withFailureHandler(function(error) {
-        alert("Error submitting form: " + error.message);
-      })
-      .processHandleTestingSubmission(handleData);
-  } else {
-    // Standard HTTP POST request when hosted on GitHub Pages
-    fetch('YOUR_WEB_APP_URL_HERE', {
-      method: 'POST',
-      body: JSON.stringify(handleData)
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert("Bench Test submitted successfully!");
-      document.getElementById('handleTestingForm').reset();
-    })
-    .catch(err => alert("Submission error: " + err));
+  function switchTab(tabId, evt) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    evt.currentTarget.classList.add('active');
   }
-}
+
+  function submitHandleTesting(e) {
+    e.preventDefault();
+    const data = {
+      action: "handleTesting",
+      date: document.getElementById('ht_date').value,
+      time: document.getElementById('ht_time').value,
+      serialNo: document.getElementById('ht_serialNo').value,
+      macId: document.getElementById('ht_macId').value,
+      extremity: document.getElementById('ht_extremity').value,
+      side: document.getElementById('ht_side').value,
+      firmwareVersion: document.getElementById('ht_firmwareVersion').value,
+      led: document.getElementById('ht_led').value,
+      buzzer: document.getElementById('ht_buzzer').value,
+      haptic1: document.getElementById('ht_haptic1').value,
+      haptic2: document.getElementById('ht_haptic2').value,
+      strGauge: document.getElementById('ht_strGauge').value,
+      charge: document.getElementById('ht_charge').value,
+      result: document.getElementById('ht_result').value,
+      calibratedStrain1: document.getElementById('ht_calibrated1').value,
+      tenLb: document.getElementById('ht_tenLb').value,
+      calibratedStrain2: document.getElementById('ht_calibrated2').value,
+      comments: document.getElementById('ht_comments').value
+    };
+    sendPayload(data, 'handleTestingForm');
+  }
+
+  function submitKitAssembly(e) {
+    e.preventDefault();
+    const data = {
+      action: "kitAssembly",
+      dateAssembled: document.getElementById('ka_date').value,
+      extremity: document.getElementById('ka_extremity').value,
+      kitSerial: document.getElementById('ka_kitSerial').value,
+      leftSerial: document.getElementById('ka_leftSerial').value,
+      rightSerial: document.getElementById('ka_rightSerial').value,
+      c1: document.getElementById('ka_c1').checked ? "YES" : "NO",
+      c2: document.getElementById('ka_c2').checked ? "YES" : "NO",
+      c3: document.getElementById('ka_c3').checked ? "YES" : "NO",
+      c4: document.getElementById('ka_c4').checked ? "YES" : "NO",
+      c5: document.getElementById('ka_c5').checked ? "YES" : "NO",
+      c6: document.getElementById('ka_c6').checked ? "YES" : "NO",
+      c7: document.getElementById('ka_c7').checked ? "YES" : "NO",
+      c8: document.getElementById('ka_c8').checked ? "YES" : "NO",
+      comments: document.getElementById('ka_comments').value
+    };
+    sendPayload(data, 'kitAssemblyForm');
+  }
+
+  function submitFailedTesting(e) {
+    e.preventDefault();
+    const data = {
+      action: "failedTesting",
+      date: document.getElementById('ft_date').value,
+      time: document.getElementById('ft_time').value,
+      serialNo: document.getElementById('ft_serialNo').value,
+      macId: document.getElementById('ft_macId').value,
+      extremity: document.getElementById('ft_extremity').value,
+      side: document.getElementById('ft_side').value,
+      led: document.getElementById('ft_led').value,
+      buzzer: document.getElementById('ft_buzzer').value,
+      haptic1: document.getElementById('ft_haptic1').value,
+      haptic2: document.getElementById('ft_haptic2').value,
+      strainCircuit: document.getElementById('ft_strainCircuit').value,
+      chargeCircuit: document.getElementById('ft_chargeCircuit').value,
+      overallResult: document.getElementById('ft_overallResult').value,
+      strainReading: document.getElementById('ft_strainReading').value,
+      comments: document.getElementById('ft_comments').value
+    };
+    sendPayload(data, 'failedTestingForm');
+  }
+
+  function sendPayload(data, formId) {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function() {
+          alert("Submission recorded successfully!");
+          document.getElementById(formId).reset();
+        })
+        .withFailureHandler(function(err) {
+          alert("Error: " + err.message);
+        })
+        .processPortalSubmission(data);
+    } else {
+      alert("Submission simulated!");
+      document.getElementById(formId).reset();
+    }
+  }
 </script>
 
 </body>
